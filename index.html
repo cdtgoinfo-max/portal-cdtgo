@@ -130,7 +130,7 @@
 <script>
 const GAS_URL='https://script.google.com/macros/s/AKfycbyLNtTuv6miUlv1bG0fmIsYZ1NmH5EJ_k8y9asN0xfN-rZ3_J3DkvDMcfy_56g2jeQA/exec';
 function fmtCOP(v){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));if(isNaN(n))return v;return'$ '+n.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0})}
-function fmtPct(v){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(',','.'));if(isNaN(n))return v+' %';return n.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:4})+' %'}
+function fmtPct(v,raw){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(',','.'));if(isNaN(n))return v+' %';const d=(!raw&&n>0&&n<1)?n*100:n;return d.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:4})+' %'}
 function set(id,v){const el=document.getElementById(id);if(el)el.innerHTML=(!v&&v!==0)||String(v).trim()===''?'<span class="empty">—</span>':String(v)}
 function setCOP(id,v){set(id,fmtCOP(v))}
 function setPct(id,v){set(id,fmtPct(v))}
@@ -162,9 +162,9 @@ function renderLead(d){
   set('f-dias-vcm',d.T?d.T+' días':'');set('f-meses-vcm',d.U?d.U+' meses':'');
   setCOP('f-int-totales',d.AC);setCOP('f-int-pagados',d.AF);setCOP('f-vf',d.AG);
   setCOP('f-dto-men',d.W);setCOP('f-dto-tot',d.X);setCOP('f-dinero',d.Y);
-  setCOP('f-giro-final',d.AO);setPct('f-tasa-fic',d.AP);setCOP('f-giro-fic',d.AQ);setCOP('f-util-bruta',d.AR);
+  setCOP('f-giro-final',d.AO);setPct('f-tasa-fic',d.AP,true);setCOP('f-giro-fic',d.AQ);setCOP('f-util-bruta',d.AR);
   set('f-especialista',d.AS);set('f-estado-lead',d.AT);set('f-email-auto',d.AU);set('f-sarlaft',d.AV);
-  setCOP('f-util-neta',d.BF);setPct('f-rt-neta',d.BG);
+  setCOP('f-util-neta',d.BF);setPct('f-rt-neta',d.BG,true);
   ['sec1','sec2','sec3','sec4','sec5'].forEach(id=>document.getElementById(id).style.display='block');
 }
 function hideResults(){document.getElementById('ts-strip').style.display='none';['sec1','sec2','sec3','sec4','sec5'].forEach(id=>document.getElementById(id).style.display='none')}
