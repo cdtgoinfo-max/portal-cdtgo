@@ -154,7 +154,7 @@ function renderLead(d){
   document.getElementById('ts-strip').style.display='flex';
   set('f-nombre',d.B);set('f-email',d.C);set('f-celular',d.D);
   set('f-emisor',d.E);setCOP('f-nominal',d.F);set('f-tipo-emision',d.G);
-  set('f-ciudad',d.H);set('f-oficina',d.I);set('f-fem',d.J);set('f-fvcm',d.K);
+  set('f-ciudad',d.H);set('f-oficina',d.I);set('f-fem',fmtFecha(d.J));set('f-fvcm',fmtFecha(d.K));
   set('f-plazo',d.L?d.L+' días':'');set('f-tipo-tasa',d.M);
   setPct('f-tasa-ea',d.N);setPct('f-spread',d.O);set('f-periodo',d.P);
   set('f-base',d.Q?d.Q+' días':'');setPct('f-tnominal',d.Z);setPct('f-tperiodica',d.AA);
@@ -171,6 +171,16 @@ function hideResults(){document.getElementById('ts-strip').style.display='none';
 function showLoading(msg){const el=document.getElementById('estado');el.className='loading';el.textContent=msg;el.style.display='block'}
 function showError(msg){const el=document.getElementById('estado');el.className='error';el.textContent='✕  '+msg;el.style.display='block'}
 function clearEstado(){const el=document.getElementById('estado');el.style.display='none';el.className=''}
+function fmtFecha(v){
+  if(!v)return'—';
+  const s=String(v);
+  // Si ya viene en formato dd/mm/yy o dd/mm/yyyy, lo dejamos
+  if(/^\d{2}\/\d{2}/.test(s))return s;
+  // Si viene en formato ISO (2026-04-27T...)
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m)return m[3]+'/'+m[2]+'/'+m[1];
+  return s;
+}  
 document.getElementById('id-input').addEventListener('keydown',e=>{if(e.key==='Enter')consultar()});
 </script>
 </body>
