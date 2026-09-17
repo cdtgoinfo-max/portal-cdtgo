@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal CDTgo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg:#0f0d1c;--surface:#1a1730;--surface2:#231f3a;--border:#2e2a4a;
+    --accent:#7c5cfc;--accent2:#4fc3f7;--ok:#26d97f;--warn:#f5a623;
+    --text:#e8e4f8;--muted:#8a84a8;--label:#5a5478;
+    --mono:'IBM Plex Mono',monospace;--sans:'Inter',system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0}
+  html,body{height:100%}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;padding-inline:16px}
+  .app{max-width:820px;margin-inline:auto;padding-block:28px 48px}
+  .header{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+  .logo-badge{width:36px;height:36px;background:var(--accent);border-radius:8px;display:grid;place-items:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
+  .header h1{font-size:18px;font-weight:600;letter-spacing:-0.3px;color:var(--text);line-height:1}
+  .header span{font-size:11px;color:var(--muted);font-family:var(--mono);display:block;margin-top:3px}
+  .search-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;gap:10px;align-items:center;margin-bottom:24px}
+  .search-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;white-space:nowrap}
+  #id-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:18px;font-weight:600;letter-spacing:3px;padding:10px 14px;outline:none;min-width:0;text-align:center;transition:border-color .15s}
+  #id-input::placeholder{color:var(--label);letter-spacing:2px;font-size:14px}
+  #id-input:focus{border-color:var(--accent)}
+  #btn-consultar{background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 20px;cursor:pointer;white-space:nowrap;transition:opacity .15s,transform .1s}
+  #btn-consultar:hover{opacity:.9}
+  #btn-consultar:active{transform:scale(.97)}
+  #estado{text-align:center;padding:14px;border-radius:8px;font-size:13px;margin-bottom:20px;display:none}
+  #estado.loading{background:var(--surface2);color:var(--muted);display:block}
+  #estado.error{background:#2d1215;color:#f47171;display:block;border:1px solid #5a2020}
+  #ts-strip{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:none;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+  .ts-id{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--accent2);letter-spacing:2px}
+  .ts-date{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden;display:none}
+  .section-header{background:var(--surface2);padding:11px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+  .section-num{width:22px;height:22px;background:var(--accent);border-radius:50%;font-size:11px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
+  .section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
+  .section-body{padding:16px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 20px}
+  .field-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--label);margin-bottom:2px}
+  .field-value{font-size:14px;font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;word-break:break-word}
+  .field-value.money{font-family:var(--mono);color:var(--ok);font-size:15px;font-weight:600}
+  .field-value.rate{font-family:var(--mono);color:var(--accent2)}
+  .field-value.empty{color:var(--label);font-style:italic}
+  .field.wide{grid-column:1/-1}
+  @media(max-width:500px){.search-box{flex-direction:column;align-items:stretch}.search-label{display:none}#btn-consultar{width:100%;text-align:center}.section-body{grid-template-columns:1fr 1fr}}
+  @media(max-width:360px){.section-body{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo-badge">C</div>
+    <div><h1>Portal Interno CDTgo</h1><span>Consulta de leads · Uso exclusivo del equipo</span></div>
+  </div>
+  <div class="search-box">
+    <span class="search-label">ID Solicitud</span>
+    <input id="id-input" type="text" maxlength="8" placeholder="12345678" inputmode="numeric" autocomplete="off" spellcheck="false">
+    <button id="btn-consultar" onclick="consultar()">Consultar ›</button>
+  </div>
+  <div id="estado"></div>
+  <div id="ts-strip"><div class="ts-id" id="ts-id-val"></div><div class="ts-date" id="ts-date-val"></div></div>
+  <div class="section" id="sec1">
+    <div class="section-header"><div class="section-num">1</div><div class="section-title">Datos del Lead</div></div>
+    <div class="section-body">
+      <div class="field wide"><div class="field-label">Nombre y Apellidos</div><div class="field-value" id="f-nombre"></div></div>
+      <div class="field"><div class="field-label">Email</div><div class="field-value" id="f-email"></div></div>
+      <div class="field"><div class="field-label">Celular</div><div class="field-value" id="f-celular"></div></div>
+    </div>
+  </div>
+  <div class="section" id="sec2">
+    <div class="section-header"><div class="section-num">2</div><div class="section-title">Condiciones del CDT</div></div>
+    <div class="section-body">
+      <div class="field"><div class="field-label">Emisor</div><div class="field-value" id="f-emisor"></div></div>
+      <div class="field"><div class="field-label">Valor Nominal</div><div class="field-value money" id="f-nominal"></div></div>
+      <div class="field"><div class="field-label">Tipo Emisión</div><div class="field-value" id="f-tipo-emision"></div></div>
+      <div class="field"><div class="field-label">Ciudad</div><div class="field-value" id="f-ciudad"></div></div>
+      <div class="field"><div class="field-label">Oficina</div><div class="field-value" id="f-oficina"></div></div>
+      <div class="field"><div class="field-label">Fecha Emisión</div><div class="field-value" id="f-fem"></div></div>
+      <div class="field"><div class="field-label">Fecha Vcmto.</div><div class="field-value" id="f-fvcm"></div></div>
+      <div class="field"><div class="field-label">Plazo (días)</div><div class="field-value" id="f-plazo"></div></div>
+      <div class="field"><div class="field-label">Tipo Tasa</div><div class="field-value" id="f-tipo-tasa"></div></div>
+      <div class="field"><div class="field-label">Tasa EA</div><div class="field-value rate" id="f-tasa-ea"></div></div>
+      <div class="field"><div class="field-label">Spread</div><div class="field-value rate" id="f-spread"></div></div>
+      <div class="field"><div class="field-label">Periodicidad</div><div class="field-value" id="f-periodo"></div></div>
+      <div class="field"><div class="field-label">Base Liquidación</div><div class="field-value" id="f-base"></div></div>
+      <div class="field"><div class="field-label">Tasa Nominal</div><div class="field-value rate" id="f-tnominal"></div></div>
+      <div class="field"><div class="field-label">Tasa Periódica</div><div class="field-value rate" id="f-tperiodica"></div></div>
+    </div>
+  </div>
+  <div class="section" id="sec3">
+    <div class="section-header"><div class="section-num">3</div><div class="section-title">Valoración</div></div>
+    <div class="section-body">
+      <div class="field"><div class="field-label">Tasa Dto. Inicial</div><div class="field-value rate" id="f-tasa-dto"></div></div>
+      <div class="field"><div class="field-label">Días Corridos</div><div class="field-value" id="f-dias-cor"></div></div>
+      <div class="field"><div class="field-label">Días p/ Vcmto.</div><div class="field-value" id="f-dias-vcm"></div></div>
+      <div class="field"><div class="field-label">Meses p/ Vcmto.</div><div class="field-value" id="f-meses-vcm"></div></div>
+      <div class="field"><div class="field-label">Intereses Totales</div><div class="field-value money" id="f-int-totales"></div></div>
+      <div class="field"><div class="field-label">Intereses Pagados</div><div class="field-value money" id="f-int-pagados"></div></div>
+      <div class="field"><div class="field-label">Valor Futuro</div><div class="field-value money" id="f-vf"></div></div>
+      <div class="field"><div class="field-label">Dto. Mensual Ini.</div><div class="field-value money" id="f-dto-men"></div></div>
+      <div class="field"><div class="field-label">Dto. Total Ini.</div><div class="field-value money" id="f-dto-tot"></div></div>
+      <div class="field"><div class="field-label">Dinero a Recibir</div><div class="field-value money" id="f-dinero"></div></div>
+    </div>
+  </div>
+  <div class="section" id="sec4">
+    <div class="section-header"><div class="section-num">4</div><div class="section-title">Overhead CDTgo</div></div>
+    <div class="section-body">
+      <div class="field"><div class="field-label">Vr. Giro Final CDTgo</div><div class="field-value money" id="f-giro-final"></div></div>
+      <div class="field"><div class="field-label">Tasa FIC CDTgo</div><div class="field-value rate" id="f-tasa-fic"></div></div>
+      <div class="field"><div class="field-label">Valor Giro FIC Est.</div><div class="field-value money" id="f-giro-fic"></div></div>
+      <div class="field"><div class="field-label">Utilidad Bruta Est.</div><div class="field-value money" id="f-util-bruta"></div></div>
+    </div>
+  </div>
+  <div class="section" id="sec5">
+    <div class="section-header"><div class="section-num">5</div><div class="section-title">Seguimiento</div></div>
+    <div class="section-body">
+      <div class="field"><div class="field-label">Especialista</div><div class="field-value" id="f-especialista"></div></div>
+      <div class="field"><div class="field-label">Estado Lead</div><div class="field-value" id="f-estado-lead"></div></div>
+      <div class="field"><div class="field-label">Email Automático</div><div class="field-value" id="f-email-auto"></div></div>
+      <div class="field"><div class="field-label">SARLAFT</div><div class="field-value" id="f-sarlaft"></div></div>
+      <div class="field"><div class="field-label">Utilidad Neta Est.</div><div class="field-value money" id="f-util-neta"></div></div>
+      <div class="field"><div class="field-label">Rt. Neta Per. Est.</div><div class="field-value rate" id="f-rt-neta"></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const GAS_URL='https://script.google.com/macros/s/AKfycbyLNtTuv6miUlv1bG0fmIsYZ1NmH5EJ_k8y9asN0xfN-rZ3_J3DkvDMcfy_56g2jeQA/exec';
+function fmtCOP(v){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));if(isNaN(n))return v;return'$ '+n.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0})}
+function fmtPct(v){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(',','.'));if(isNaN(n))return v+' %';return n.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:4})+' %'}
+function set(id,v){const el=document.getElementById(id);if(el)el.innerHTML=(!v&&v!==0)||String(v).trim()===''?'<span class="empty">—</span>':String(v)}
+function setCOP(id,v){set(id,fmtCOP(v))}
+function setPct(id,v){set(id,fmtPct(v))}
+function consultar(){
+  const id=document.getElementById('id-input').value.trim();
+  if(!id||id.length<6){showError('Ingresa el ID de 8 dígitos.');return}
+  hideResults();showLoading('Consultando...');
+  const cbName='cb_'+Date.now();
+  const script=document.createElement('script');
+  const timer=setTimeout(()=>{cleanup();showError('Tiempo agotado. Verifica el GAS.')},10000);
+  function cleanup(){clearTimeout(timer);delete window[cbName];if(script.parentNode)script.parentNode.removeChild(script)}
+  window[cbName]=function(data){cleanup();clearEstado();if(data.error){showError(data.error);return}renderLead(data)};
+  script.onerror=function(){cleanup();showError('No se pudo conectar al GAS.')};
+  script.src=GAS_URL+'?id='+encodeURIComponent(id)+'&callback='+cbName;
+  document.head.appendChild(script);
+}
+function renderLead(d){
+  const parts=(d.A||'').split(' - ');
+  document.getElementById('ts-id-val').textContent=parts[1]||'';
+  document.getElementById('ts-date-val').textContent=parts[0]||'';
+  document.getElementById('ts-strip').style.display='flex';
+  set('f-nombre',d.B);set('f-email',d.C);set('f-celular',d.D);
+  set('f-emisor',d.E);setCOP('f-nominal',d.F);set('f-tipo-emision',d.G);
+  set('f-ciudad',d.H);set('f-oficina',d.I);set('f-fem',d.J);set('f-fvcm',d.K);
+  set('f-plazo',d.L?d.L+' días':'');set('f-tipo-tasa',d.M);
+  setPct('f-tasa-ea',d.N);setPct('f-spread',d.O);set('f-periodo',d.P);
+  set('f-base',d.Q?d.Q+' días':'');setPct('f-tnominal',d.Z);setPct('f-tperiodica',d.AA);
+  setPct('f-tasa-dto',d.R);set('f-dias-cor',d.S?d.S+' días':'');
+  set('f-dias-vcm',d.T?d.T+' días':'');set('f-meses-vcm',d.U?d.U+' meses':'');
+  setCOP('f-int-totales',d.AC);setCOP('f-int-pagados',d.AF);setCOP('f-vf',d.AG);
+  setCOP('f-dto-men',d.W);setCOP('f-dto-tot',d.X);setCOP('f-dinero',d.Y);
+  setCOP('f-giro-final',d.AO);setPct('f-tasa-fic',d.AP);setCOP('f-giro-fic',d.AQ);setCOP('f-util-bruta',d.AR);
+  set('f-especialista',d.AS);set('f-estado-lead',d.AT);set('f-email-auto',d.AU);set('f-sarlaft',d.AV);
+  setCOP('f-util-neta',d.BF);setPct('f-rt-neta',d.BG);
+  ['sec1','sec2','sec3','sec4','sec5'].forEach(id=>document.getElementById(id).style.display='block');
+}
+function hideResults(){document.getElementById('ts-strip').style.display='none';['sec1','sec2','sec3','sec4','sec5'].forEach(id=>document.getElementById(id).style.display='none')}
+function showLoading(msg){const el=document.getElementById('estado');el.className='loading';el.textContent=msg;el.style.display='block'}
+function showError(msg){const el=document.getElementById('estado');el.className='error';el.textContent='✕  '+msg;el.style.display='block'}
+function clearEstado(){const el=document.getElementById('estado');el.style.display='none';el.className=''}
+document.getElementById('id-input').addEventListener('keydown',e=>{if(e.key==='Enter')consultar()});
+</script>
+</body>
+</html>
