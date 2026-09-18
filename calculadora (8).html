@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calculadora Interna — CDTgo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg:       #0f0d1c;
+    --surface:  #1a1730;
+    --surface2: #231f3a;
+    --border:   #2e2a4a;
+    --accent:   #7c5cfc;
+    --cyan:     #4fc3f7;
+    --ok:       #26d97f;
+    --warn:     #f5a623;
+    --danger:   #f47171;
+    --text:     #e8e4f8;
+    --muted:    #8a84a8;
+    --label:    #5a5478;
+    --mono:     'IBM Plex Mono', monospace;
+    --sans:     'Inter', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.55;
+    padding-inline: 16px;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle, rgba(124,92,252,.18) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── AUTH OVERLAY ─────────────────────────── */
+  #auth-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  #auth-overlay::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle, rgba(124,92,252,.18) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none; z-index: 0;
+  }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%; max-width: 420px;
+    overflow: hidden;
+    position: relative; z-index: 1;
+    box-shadow: 0 0 60px rgba(124,92,252,.15);
+  }
+  .auth-card::before {
+    content: '';
+    display: block; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--cyan));
+  }
+  .auth-header {
+    padding: 28px 28px 20px;
+    text-align: center;
+  }
+  .auth-logo {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--accent), #4f3ab0);
+    border-radius: 14px;
+    display: grid; place-items: center;
+    font-size: 24px; margin: 0 auto 16px;
+    box-shadow: 0 0 24px rgba(124,92,252,.4);
+  }
+  .auth-header h2 {
+    font-size: 18px; font-weight: 700; color: var(--text);
+    margin-bottom: 6px;
+  }
+  .auth-header p {
+    font-size: 12px; color: var(--muted);
+    font-family: var(--mono); letter-spacing: .4px;
+  }
+  .auth-step {
+    padding: 0 28px 24px;
+    display: none;
+  }
+  .auth-step.active { display: block; }
+  .auth-step-label {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em;
+    color: var(--label); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .auth-step-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .auth-step input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px; font-weight: 600;
+    letter-spacing: 2px;
+    padding: 13px 16px;
+    outline: none;
+    transition: border-color .15s;
+    text-align: center;
+  }
+  .auth-step input:focus { border-color: var(--accent); }
+  .auth-step input.error { border-color: var(--danger); }
+  .auth-step input.ok-state { border-color: var(--ok); }
+  .auth-btn {
+    width: 100%; margin-top: 12px;
+    padding: 12px;
+    background: linear-gradient(135deg, var(--accent), #4f3ab0);
+    color: #fff; border: none; border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; letter-spacing: .03em;
+    transition: opacity .15s, transform .1s;
+    box-shadow: 0 0 16px rgba(124,92,252,.3);
+  }
+  .auth-btn:hover  { opacity: .88; }
+  .auth-btn:active { transform: scale(.98); }
+  .auth-error {
+    margin-top: 8px;
+    font-size: 12px; color: var(--danger);
+    text-align: center; min-height: 18px;
+    font-family: var(--mono);
+  }
+  .auth-progress {
+    display: flex; gap: 6px; justify-content: center;
+    padding: 0 28px 24px;
+  }
+  .auth-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border); transition: background .3s;
+  }
+  .auth-dot.done  { background: var(--ok); }
+  .auth-dot.active { background: var(--accent); }
+
+  /* ── APP ──────────────────────────────────── */
+  .app {
+    max-width: 860px; margin-inline: auto;
+    padding-block: 28px 56px;
+    position: relative; z-index: 1;
+    display: none;
+  }
+  .app.visible { display: block; }
+
+  .header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 32px;
+  }
+  .logo-badge {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), #4f3ab0);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 18px; color: #fff;
+    box-shadow: 0 0 20px rgba(124,92,252,.4);
+    flex-shrink: 0;
+  }
+  .header-text h1 {
+    font-size: 19px; font-weight: 700;
+    letter-spacing: -.3px; color: var(--text); line-height: 1;
+  }
+  .header-text span {
+    font-size: 11px; color: var(--muted);
+    font-family: var(--mono); display: block; margin-top: 4px;
+  }
+  .header-badge {
+    margin-left: auto;
+    background: rgba(38,217,127,.12);
+    border: 1px solid rgba(38,217,127,.3);
+    color: var(--ok);
+    font-size: 11px; font-family: var(--mono);
+    padding: 4px 12px; border-radius: 20px;
+    font-weight: 600; letter-spacing: .5px;
+  }
+
+  /* ── CARDS ───────────────────────────────── */
+  .sec-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 18px;
+    overflow: hidden; position: relative;
+  }
+  .sec-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+  .sec-card.cyan::before  { background: linear-gradient(90deg, var(--cyan), transparent); }
+  .sec-card.green::before { background: linear-gradient(90deg, var(--ok),   transparent); }
+  .sec-card.warn::before  { background: linear-gradient(90deg, var(--warn),  transparent); }
+
+  .sec-head {
+    background: var(--surface2);
+    padding: 12px 20px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sec-num {
+    width: 24px; height: 24px;
+    background: var(--accent);
+    border-radius: 50%;
+    font-size: 11px; font-weight: 700; color: #fff;
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .sec-card.cyan  .sec-num { background: var(--cyan);  color: #0f0d1c; }
+  .sec-card.green .sec-num { background: var(--ok);    color: #0f0d1c; }
+  .sec-card.warn  .sec-num { background: var(--warn);  color: #0f0d1c; }
+  .sec-title {
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .07em;
+    color: var(--text);
+  }
+
+  /* ── GRID ────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; }
+  .cell {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cell:nth-child(odd)  { border-right: 1px solid var(--border); }
+  .cell.full { grid-column: 1 / -1; border-right: none; }
+  .cell:last-child, .cell.full:last-child { border-bottom: none; }
+  .cell label {
+    display: block;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--label); margin-bottom: 5px;
+  }
+
+  /* ── INPUTS ──────────────────────────────── */
+  .cell input, .cell select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-family: var(--sans); font-size: 13px;
+    padding: 8px 11px; outline: none;
+    transition: border-color .15s;
+    appearance: none; -webkit-appearance: none;
+  }
+  .cell select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a84a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px; cursor: pointer;
+  }
+  .cell input:focus, .cell select:focus { border-color: var(--accent); }
+  .cell input[type=date] { color-scheme: dark; }
+
+  /* Valor nominal con separador visual */
+  #s1-nominal { font-family: var(--mono); font-size: 14px; letter-spacing: .5px; }
+
+  /* ── OUTPUTS ─────────────────────────────── */
+  .cell.out { background: rgba(46,42,74,.35); }
+  .cell.out label { color: var(--muted); }
+  .cell.out .val {
+    font-family: var(--mono); font-size: 14px; font-weight: 600;
+    color: var(--cyan);
+  }
+  .cell.out.ok  .val { color: var(--ok); }
+  .cell.out.dim .val { color: var(--muted); }
+
+  /* Plazo editable */
+  .cell.plazo-cell input {
+    font-family: var(--mono); font-size: 14px; font-weight: 600;
+    color: var(--cyan); background: rgba(46,42,74,.35);
+    border-color: transparent;
+  }
+  .cell.plazo-cell input:focus { border-color: var(--accent); color: var(--text); }
+
+  /* ── BIG RESULT ──────────────────────────── */
+  .big-result {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(124,92,252,.12), rgba(79,195,247,.06));
+    border-top: 1px solid var(--border);
+    padding: 18px 24px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .big-result label {
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    color: var(--muted); margin-bottom: 0;
+  }
+  .big-result .val {
+    font-family: var(--mono); font-size: 22px; font-weight: 700; color: #fff;
+  }
+  .big-result.ok   { background: linear-gradient(135deg, rgba(38,217,127,.10), rgba(38,217,127,.03)); }
+  .big-result.ok   .val { color: var(--ok); }
+  .big-result.warn { background: linear-gradient(135deg, rgba(245,166,35,.10), rgba(245,166,35,.03)); }
+  .big-result.warn .val { color: var(--warn); }
+  .big-result.cyan { background: linear-gradient(135deg, rgba(79,195,247,.10), rgba(79,195,247,.03)); }
+  .big-result.cyan .val { color: var(--cyan); }
+
+  /* ── SUB-DIVIDER ─────────────────────────── */
+  .sub-div {
+    grid-column: 1/-1;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 20px;
+    background: rgba(0,0,0,.15);
+  }
+  .sub-div span {
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .1em; color: var(--label);
+  }
+  .sub-div::before, .sub-div::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── ACTIONS ─────────────────────────────── */
+  .actions { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+  .btn {
+    padding: 9px 22px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: var(--sans); font-size: 13px; font-weight: 600;
+    transition: opacity .15s, transform .1s; letter-spacing: .02em;
+  }
+  .btn:hover  { opacity: .88; }
+  .btn:active { transform: scale(.97); }
+  .btn-ghost {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #4f3ab0);
+    color: #fff; box-shadow: 0 0 14px rgba(124,92,252,.3);
+  }
+
+  footer {
+    text-align: center; color: var(--label);
+    font-size: 11px; font-family: var(--mono);
+    padding-top: 28px; letter-spacing: .5px;
+  }
+
+  @media (max-width: 560px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .cell, .cell:nth-child(odd) { border-right: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     AUTH OVERLAY — 3 pasos
+══════════════════════════════════════════════ -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">🧮</div>
+      <h2>Calculadora CDTgo</h2>
+      <p>Acceso restringido · Solo equipo</p>
+    </div>
+
+    <!-- Paso 1: Código de acceso -->
+    <div class="auth-step active" id="step-1">
+      <div class="auth-step-label">Paso 1 de 3 — Código de acceso</div>
+      <input type="password" id="auth-code" placeholder="••••••••••" autocomplete="off"
+             onkeydown="if(event.key==='Enter') authStep1()">
+      <button class="auth-btn" onclick="authStep1()">Continuar →</button>
+      <div class="auth-error" id="err-1"></div>
+    </div>
+
+    <!-- Paso 2: Email -->
+    <div class="auth-step" id="step-2">
+      <div class="auth-step-label">Paso 2 de 3 — Email corporativo</div>
+      <input type="email" id="auth-email" placeholder="usuario@cdtgo.com" autocomplete="off"
+             onkeydown="if(event.key==='Enter') authStep2()">
+      <button class="auth-btn" onclick="authStep2()">Continuar →</button>
+      <div class="auth-error" id="err-2"></div>
+    </div>
+
+    <!-- Paso 3: Pregunta secreta -->
+    <div class="auth-step" id="step-3">
+      <div class="auth-step-label">Paso 3 de 3 — Pregunta de seguridad</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;text-align:center;">
+        ¿Dónde trabajaron juntos?
+      </p>
+      <input type="text" id="auth-secret" placeholder="Respuesta" autocomplete="off"
+             onkeydown="if(event.key==='Enter') authStep3()">
+      <button class="auth-btn" onclick="authStep3()">Ingresar →</button>
+      <div class="auth-error" id="err-3"></div>
+    </div>
+
+    <!-- Progreso -->
+    <div class="auth-progress">
+      <div class="auth-dot active" id="dot-1"></div>
+      <div class="auth-dot" id="dot-2"></div>
+      <div class="auth-dot" id="dot-3"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     APP PRINCIPAL
+══════════════════════════════════════════════ -->
+<div class="app" id="main-app">
+
+  <div class="header">
+    <div class="logo-badge">🧮</div>
+    <div class="header-text">
+      <h1>Calculadora CDTgo</h1>
+      <span>Herramienta interna · Solo equipo</span>
+    </div>
+    <div class="header-badge">✓ AUTENTICADO</div>
+  </div>
+
+  <!-- SECCIÓN 1 -->
+  <div class="sec-card">
+    <div class="sec-head">
+      <div class="sec-num">1</div>
+      <div class="sec-title">¿Cuánto Recibo por mi CDT?</div>
+    </div>
+    <div class="grid-2">
+
+      <div class="sub-div"><span>Datos del CDT</span></div>
+
+      <div class="cell">
+        <label>Emisor</label>
+        <select id="s1-emisor" oninput="calcular()">
+          <option value="">— Seleccionar —</option>
+          <option>Bancolombia</option>
+          <option>Davivienda</option>
+          <option>Banco Caja Social</option>
+          <option>Banco de Bogotá</option>
+          <option>Banco de Occidente</option>
+          <option>Banco Popular</option>
+          <option>Banco AV Villas</option>
+          <option>Banco Agrario</option>
+          <option>BBVA</option>
+          <option>Nu Bank CF</option>
+          <option>Banco Unión</option>
+          <option>Ban100</option>
+          <option>Banco Falabella</option>
+          <option>GNB Sudameris</option>
+          <option>Banco W</option>
+          <option>Banco Mundo Mujer</option>
+          <option>Bancoomeva</option>
+          <option>Banco Contactar</option>
+          <option>Bancamia</option>
+          <option>Pi Bank</option>
+          <option>Banco Serfinanza</option>
+          <option>Davibank</option>
+          <option>Mi Banco</option>
+          <option>IRIS CF</option>
+          <option>Credifamilia</option>
+          <option>Coopcentral</option>
+          <option>Tuya</option>
+          <option>JFK Coop</option>
+          <option>Cotrafa</option>
+          <option>CFA</option>
+          <option>Confiar</option>
+        </select>
+      </div>
+      <div class="cell">
+        <label>Valor Nominal ($)</label>
+        <input type="text" id="s1-nominal" placeholder="37.000.000"
+               oninput="fmtNominal(this); calcular()"
+               onkeydown="return allowNumericInput(event)">
+      </div>
+      <div class="cell">
+        <label>Tipo de Emisión</label>
+        <select id="s1-tipo-emision" oninput="calcular()">
+          <option value="Electrónico">Electrónico</option>
+          <option value="Físico">Físico</option>
+          <option value="Desmaterializado">Desmaterializado</option>
+        </select>
+      </div>
+      <div class="cell"><!-- spacer --></div>
+      <div class="cell">
+        <label>Ciudad</label>
+        <input type="text" id="s1-ciudad" placeholder="Bucaramanga" oninput="calcular()">
+      </div>
+      <div class="cell">
+        <label>Oficina de Emisión</label>
+        <input type="text" id="s1-oficina" placeholder="CC Floridablanca" oninput="calcular()">
+      </div>
+
+      <div class="sub-div"><span>Condiciones Financieras</span></div>
+
+      <div class="cell">
+        <label>Fecha Emisión ó Prórroga</label>
+        <input type="date" id="s1-fem" oninput="syncPlazo(); calcular()">
+      </div>
+      <div class="cell">
+        <label>Fecha Vencimiento</label>
+        <input type="date" id="s1-fvcm" oninput="syncPlazo(); calcular()">
+      </div>
+
+      <!-- Base de Liquidación — justo después de fechas, default 360 -->
+      <div class="cell">
+        <label>Base de Liquidación</label>
+        <select id="s1-base" oninput="syncPlazo(); calcular()">
+          <option value="360" selected>360 días</option>
+          <option value="365">365 días</option>
+        </select>
+      </div>
+
+      <!-- Plazo editable -->
+      <div class="cell plazo-cell">
+        <label>Plazo en Días (auto · editable)</label>
+        <input type="text" id="r-plazo" placeholder="—"
+               oninput="onPlazoManual(this)" onkeydown="return allowNumericInput(event)">
+      </div>
+
+      <div class="cell out">
+        <label>Días Corridos</label>
+        <div class="val" id="r-dias-corridos">—</div>
+      </div>
+      <div class="cell out">
+        <label>Días al Vencimiento</label>
+        <div class="val" id="r-dias-vcm">—</div>
+      </div>
+      <div class="cell out">
+        <label>Meses al Vencimiento</label>
+        <div class="val" id="r-meses-vcm">—</div>
+      </div>
+      <div class="cell out dim"><!-- balanceo --></div>
+
+      <div class="cell">
+        <label>Tipo de Tasa</label>
+        <select id="s1-tipo-tasa" oninput="calcular()">
+          <option value="fija">Tasa Fija</option>
+          <option value="dtf">Tasa Variable en DTF</option>
+          <option value="ipc">Tasa Variable en IPC</option>
+          <option value="ibr">Tasa Variable en IBR</option>
+        </select>
+      </div>
+      <div class="cell">
+        <label>Tasa EA (%)</label>
+        <input type="number" step="0.001" id="s1-tasa-ea" placeholder="9.95" oninput="calcular()">
+      </div>
+      <div class="cell">
+        <label>Puntos Adicionales / Spread (%)</label>
+        <input type="number" step="0.001" id="s1-spread" placeholder="0" value="0" oninput="calcular()">
+      </div>
+      <div class="cell">
+        <label>Periodicidad de Pago</label>
+        <select id="s1-periodicidad" oninput="calcular()">
+          <option value="0">Al Vencimiento</option>
+          <option value="12">Mes Vencido (MV)</option>
+          <option value="6">Bimestre Vencido (BV)</option>
+          <option value="4">Trimestre Vencido (TV)</option>
+          <option value="2">Semestre Vencido (SV)</option>
+          <option value="1">Año Vencido (AV)</option>
+        </select>
+      </div>
+      <div class="cell out dim">
+        <label>Periodos / Año (auto)</label>
+        <div class="val" id="r-periodos-anio">—</div>
+      </div>
+
+      <div class="sub-div"><span>Descuento CDTgo</span></div>
+
+      <div class="cell out">
+        <label>Fecha Último Pago Intereses</label>
+        <div class="val" id="r-fecha-ult-pago">—</div>
+      </div>
+      <div class="cell out ok">
+        <label>Intereses por Periodo</label>
+        <div class="val" id="r-int-periodo">—</div>
+      </div>
+
+      <div class="cell">
+        <label>Tasa Descuento Mensual CDTgo (%)</label>
+        <select id="s1-tasa-dto" oninput="calcular()">
+          <option value="0.25">0,25 %</option>
+          <option value="0.50" selected>0,50 %</option>
+          <option value="0.75">0,75 %</option>
+          <option value="1.00">1,00 %</option>
+          <option value="1.25">1,25 %</option>
+          <option value="1.50">1,50 %</option>
+          <option value="1.75">1,75 %</option>
+          <option value="2.00">2,00 %</option>
+          <option value="2.25">2,25 %</option>
+          <option value="2.50">2,50 %</option>
+          <option value="2.75">2,75 %</option>
+          <option value="3.00">3,00 %</option>
+          <option value="3.25">3,25 %</option>
+          <option value="3.50">3,50 %</option>
+          <option value="3.75">3,75 %</option>
+          <option value="4.00">4,00 %</option>
+          <option value="4.25">4,25 %</option>
+          <option value="4.50">4,50 %</option>
+          <option value="4.75">4,75 %</option>
+          <option value="5.00">5,00 %</option>
+        </select>
+      </div>
+      <div class="cell out">
+        <label>Descuento Mensual Estimado</label>
+        <div class="val" id="r-dto-mensual">—</div>
+      </div>
+      <div class="cell out full">
+        <label>Descuento Total Estimado</label>
+        <div class="val" id="r-dto-total">—</div>
+      </div>
+
+      <div class="big-result ok">
+        <label>DINERO A RECIBIR</label>
+        <div class="val" id="r-dinero-recibir">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 2 -->
+  <div class="sec-card cyan">
+    <div class="sec-head">
+      <div class="sec-num">2</div>
+      <div class="sec-title">Valoración CDT</div>
+    </div>
+    <div class="grid-2">
+      <div class="cell out"><label>Tasa EA</label><div class="val" id="r2-tasa-ea">—</div></div>
+      <div class="cell out"><label>Tasa Nominal</label><div class="val" id="r2-tasa-nom">—</div></div>
+      <div class="cell out"><label>Tasa Periódica</label><div class="val" id="r2-tasa-per">—</div></div>
+      <div class="cell out ok"><label>Intereses por Periodo</label><div class="val" id="r2-int-periodo">—</div></div>
+      <div class="cell out ok"><label>Intereses Totales</label><div class="val" id="r2-int-total">—</div></div>
+      <div class="cell out"><label>RteFuente Rendimientos (4%)</label><div class="val" id="r2-rte-fuente">—</div></div>
+      <div class="cell out ok"><label>Intereses Netos</label><div class="val" id="r2-int-netos">—</div></div>
+      <div class="cell out dim"><label>Intereses Pagados</label><div class="val" id="r2-int-pagados">—</div></div>
+      <div class="big-result cyan"><label>VALOR FUTURO</label><div class="val" id="r2-valor-futuro">—</div></div>
+      <div class="big-result" style="border-top:1px solid var(--border);">
+        <label>VALOR FUTURO NETO</label><div class="val" id="r2-vf-neto">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 3 -->
+  <div class="sec-card green">
+    <div class="sec-head">
+      <div class="sec-num">3</div>
+      <div class="sec-title">Negociación CDTgo</div>
+    </div>
+    <div class="grid-2">
+      <div class="cell">
+        <label>Fecha Cotización</label>
+        <input type="date" id="s3-fecha-cot" oninput="calcular()">
+      </div>
+      <div class="cell">
+        <label>Fecha Negociación</label>
+        <input type="date" id="s3-fecha-neg" oninput="calcular()">
+      </div>
+      <div class="cell">
+        <label>Ciudad Negociación</label>
+        <input type="text" id="s3-ciudad" placeholder="Bucaramanga" oninput="calcular()">
+      </div>
+      <div class="cell">
+        <label>Oficina Negociación</label>
+        <input type="text" id="s3-oficina" placeholder="CC Floridablanca" oninput="calcular()">
+      </div>
+      <div class="cell">
+        <label>Tasa FIC CDTgo (%)</label>
+        <input type="number" step="0.01" id="s3-tasa-fic" placeholder="18" oninput="calcular()">
+      </div>
+      <div class="cell out ok"><label>Valor Giro FIC</label><div class="val" id="r3-giro-fic">—</div></div>
+      <div class="big-result warn">
+        <label>UTILIDAD BRUTA ESTIMADA</label>
+        <div class="val" id="r3-util-bruta">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECCIÓN 4 -->
+  <div class="sec-card warn">
+    <div class="sec-head">
+      <div class="sec-num">4</div>
+      <div class="sec-title">P&amp;G CDTgo</div>
+    </div>
+    <div class="grid-2">
+      <div class="cell">
+        <label>N° de GMFs</label>
+        <input type="number" id="s4-num-gmf" placeholder="1" value="1" min="0" oninput="calcular()">
+      </div>
+      <div class="cell out">
+        <label>Costo GMF (4×1000 sobre Dinero a Recibir)</label>
+        <div class="val" id="r4-costo-gmf">—</div>
+      </div>
+
+      <div class="sub-div"><span>Gastos Operacionales</span></div>
+
+      <div class="cell"><label>Gastos Movilidad ($)</label>
+        <input type="text" id="s4-movilidad" placeholder="0" oninput="fmtGasto(this);calcular()" onkeydown="return allowNumericInput(event)"></div>
+      <div class="cell"><label>Gastos Pasajes ($)</label>
+        <input type="text" id="s4-pasajes" placeholder="0" oninput="fmtGasto(this);calcular()" onkeydown="return allowNumericInput(event)"></div>
+      <div class="cell"><label>Gastos Comidas y Bebidas ($)</label>
+        <input type="text" id="s4-comidas" placeholder="0" oninput="fmtGasto(this);calcular()" onkeydown="return allowNumericInput(event)"></div>
+      <div class="cell"><label>Comisión BVC ($)</label>
+        <input type="text" id="s4-bvc" placeholder="0" oninput="fmtGasto(this);calcular()" onkeydown="return allowNumericInput(event)"></div>
+      <div class="cell"><label>Documentación ($)</label>
+        <input type="text" id="s4-docs" placeholder="0" oninput="fmtGasto(this);calcular()" onkeydown="return allowNumericInput(event)"></div>
+      <div class="cell"><label>Referral Fee ($)</label>
+        <input type="text" id="s4-referral" placeholder="0" oninput="fmtGasto(this);calcular()" onkeydown="return allowNumericInput(event)"></div>
+
+      <div class="cell out dim full">
+        <label>Total Gastos</label>
+        <div class="val" id="r4-total-gastos">—</div>
+      </div>
+      <div class="big-result ok">
+        <label>UTILIDAD NETA</label>
+        <div class="val" id="r4-util-neta">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-ghost" onclick="limpiar()">🗑 Limpiar todo</button>
+    <button class="btn btn-primary" onclick="window.print()">🖨 Imprimir / PDF</button>
+  </div>
+
+</div><!-- .app -->
+
+<footer id="main-footer" style="display:none;">
+  CDTgo · Calculadora Interna · Solo equipo · cdtgo.com
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════ */
+const AUTH = {
+  code:    btoa('PlmQaz2026$'),
+  emails:  ['mcastrillon@cdtgo.com', 'jujueta@cdtgo.com'],
+  secret:  'suma valores'
+};
+
+let authPhase = 1;
+
+function setDot(phase) {
+  for (let i = 1; i <= 3; i++) {
+    const d = document.getElementById('dot-' + i);
+    if (i < phase)       { d.className = 'auth-dot done'; }
+    else if (i === phase){ d.className = 'auth-dot active'; }
+    else                 { d.className = 'auth-dot'; }
+  }
+}
+
+function showStep(n) {
+  document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  setDot(n);
+  authPhase = n;
+  setTimeout(() => {
+    const inp = document.querySelector('#step-' + n + ' input');
+    if (inp) inp.focus();
+  }, 80);
+}
+
+function setErr(n, msg) {
+  const el = document.getElementById('err-' + n);
+  if (el) el.textContent = msg;
+  const inp = document.querySelector('#step-' + n + ' input');
+  if (inp) { inp.classList.add('error'); setTimeout(() => inp.classList.remove('error'), 1200); }
+}
+
+function authStep1() {
+  const val = document.getElementById('auth-code').value;
+  if (btoa(val) === AUTH.code) {
+    showStep(2);
+  } else {
+    setErr(1, '✕ Código incorrecto.');
+    document.getElementById('auth-code').value = '';
+  }
+}
+
+function authStep2() {
+  const val = document.getElementById('auth-email').value.trim().toLowerCase();
+  if (AUTH.emails.includes(val)) {
+    showStep(3);
+  } else {
+    setErr(2, '✕ Email no autorizado.');
+    document.getElementById('auth-email').value = '';
+  }
+}
+
+function authStep3() {
+  const val = document.getElementById('auth-secret').value.trim().toLowerCase();
+  if (val === AUTH.secret) {
+    // ¡Acceso concedido!
+    document.getElementById('auth-overlay').style.display = 'none';
+    document.getElementById('main-app').classList.add('visible');
+    document.getElementById('main-footer').style.display = 'block';
+    const hoy = new Intl.DateTimeFormat('en-CA', {timeZone:'America/Bogota', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
+    document.getElementById('s3-fecha-cot').value = hoy;
+    document.getElementById('s3-fecha-neg').value = hoy;
+    calcular();
+  } else {
+    setErr(3, '✕ Respuesta incorrecta.');
+    document.getElementById('auth-secret').value = '';
+  }
+}
+
+/* ══════════════════════════════════════════════
+   UTILIDADES
+══════════════════════════════════════════════ */
+const $  = id => document.getElementById(id);
+const sv = id => { const el=$(id); return el ? el.value||'' : ''; };
+const nv = id => { const el=$(id); if(!el) return 0; const raw=el.value.replace(/\./g,'').replace(',','.'); return parseFloat(raw)||0; };
+
+function allowNumericInput(e) {
+  const allow = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+  if (allow.includes(e.key)) return true;
+  if (e.key === '.' || e.key === ',') return true;
+  if (e.key >= '0' && e.key <= '9') return true;
+  e.preventDefault(); return false;
+}
+
+// Formato con puntos al escribir el nominal
+function fmtNominal(input) {
+  let raw = input.value.replace(/\./g, '').replace(/[^0-9]/g,'');
+  if (raw === '') { input.value = ''; return; }
+  const n = parseInt(raw, 10);
+  input.value = n.toLocaleString('es-CO').replace(/,/g,'.');
+}
+
+// Mismo formato para gastos operacionales
+function fmtGasto(input) {
+  let raw = input.value.replace(/\./g, '').replace(/[^0-9]/g,'');
+  if (raw === '') { input.value = ''; return; }
+  const n = parseInt(raw, 10);
+  input.value = n.toLocaleString('es-CO').replace(/,/g,'.');
+}
+
+function getGasto(id) {
+  const raw = sv(id).replace(/\./g,'').replace(',','.');
+  return parseFloat(raw) || 0;
+}
+
+function getNominal() {
+  const raw = sv('s1-nominal').replace(/\./g,'').replace(',','.');
+  return parseFloat(raw) || 0;
+}
+
+function cop(n) {
+  if (n === null || isNaN(n)) return '—';
+  const neg = n < 0;
+  const abs = Math.abs(Math.round(n));
+  return (neg ? '- $ ' : '$ ') + abs.toLocaleString('es-CO');
+}
+function pct(n, dec=2) {
+  if (isNaN(n) || n===null) return '—';
+  return n.toFixed(dec).replace('.',',') + ' %';
+}
+function set(id, val) { const el=$(id); if(el) el.textContent=val; }
+// días calendario entre dos fechas 'YYYY-MM-DD'
+function daysBetween(a, b) {
+  if(!a||!b) return null;
+  return Math.round((new Date(b+'T12:00:00') - new Date(a+'T12:00:00')) / 86400000);
+}
+
+// DIAS360 según método NASD (igual a Excel/GS por defecto)
+// =SI(B14=360; DIAS360(inicio;fin) ; fin-inicio)
+function dias360(a, b) {
+  if(!a||!b) return null;
+  const [ay,am,ad] = a.split('-').map(Number);
+  const [by,bm,bd] = b.split('-').map(Number);
+  let d1 = ad, d2 = bd;
+  if (d1 === 31) d1 = 30;
+  if (d2 === 31 && d1 === 30) d2 = 30;
+  return (by - ay)*360 + (bm - am)*30 + (d2 - d1);
+}
+
+function calcDias(inicio, fin, base) {
+  // base: '360' o '365'
+  if (!inicio || !fin) return null;
+  if (String(base) === '360') return dias360(inicio, fin);
+  return daysBetween(inicio, fin);
+}
+
+function fmtFecha(ds) {
+  if(!ds) return '—';
+  const [y,m,d] = ds.split('-'); return d+'/'+m+'/'+y;
+}
+
+/* Plazo: sincroniza entre fechas y campo manual */
+let plazoManual = null;
+
+function syncPlazo() {
+  const fem  = sv('s1-fem');
+  const fvcm = sv('s1-fvcm');
+  const base = sv('s1-base') || '360';
+  const dias = calcDias(fem, fvcm, base);
+  if (dias !== null) {
+    $('r-plazo').value = dias;
+    plazoManual = null;
+  }
+}
+
+function onPlazoManual(inp) {
+  const val = parseInt(inp.value);
+  plazoManual = isNaN(val) ? null : val;
+  calcular();
+}
+
+function getPlazo(base) {
+  if (plazoManual !== null) return plazoManual;
+  const fem  = sv('s1-fem');
+  const fvcm = sv('s1-fvcm');
+  return calcDias(fem, fvcm, base);
+}
+
+/* Periodos/año — fórmula exacta GS:
+   =SI(B13="MV";12; SI(B13="BV";6; SI(B13="TV";4; SI(B13="SV";2; SI(B13="AV";1; 1))))) */
+function getPeriodosAnio(periStr) {
+  switch(periStr) {
+    case '12': return 12;
+    case '6':  return 6;
+    case '4':  return 4;
+    case '2':  return 2;
+    case '1':  return 1;
+    default:   return 1;
+  }
+}
+
+function ea2nominal(ea, m)   { if(!m) return ea; return m*(Math.pow(1+ea/100,1/m)-1)*100; }
+function ea2periodica(ea, m) { if(!m) return ea; return (Math.pow(1+ea/100,1/m)-1)*100; }
+
+/* ══════════════════════════════════════════════
+   CALCULADORA PRINCIPAL
+══════════════════════════════════════════════ */
+function calcular() {
+  const nominal  = getNominal();
+  const fem      = sv('s1-fem');
+  const fvcm     = sv('s1-fvcm');
+  const base     = sv('s1-base') || '360';
+  const spread   = parseFloat(sv('s1-spread').replace(',','.')) || 0;
+  const tasaEA   = (parseFloat(sv('s1-tasa-ea').replace(',','.')) || 0) + spread;
+  const periStr  = sv('s1-periodicidad');
+  const periAnio = getPeriodosAnio(periStr);
+  const alVcto   = periStr === '0' || periStr === '';
+  const tasaDto  = parseFloat(sv('s1-tasa-dto')) || 0;
+
+  const hoy = new Intl.DateTimeFormat('en-CA', {timeZone:'America/Bogota', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
+  const plazo    = getPlazo(base);
+
+  // Fórmulas exactas del GS:
+  // Días corridos  = SI(B14=360; DIAS360(B7;HOY()); HOY()-B7)
+  // Días al vencim = SI(B14=360; DIAS360(HOY();B8); B8-HOY())
+  const diasCorr = calcDias(fem, hoy, base);
+  const diasVcm  = calcDias(hoy, fvcm, base);
+  // Meses al vencimiento = B18/30  (donde B18 = Días al vencimiento)
+  const mesesVcm = diasVcm !== null ? diasVcm / 30 : null;
+
+  // Actualizar campo plazo si viene de fechas (no manual)
+  if (plazoManual === null && plazo !== null) {
+    const pEl = $('r-plazo');
+    if (pEl && document.activeElement !== pEl) pEl.value = plazo;
+  }
+
+  set('r-dias-corridos', diasCorr !== null ? diasCorr + ' días' : '—');
+  set('r-dias-vcm',      diasVcm  !== null ? diasVcm  + ' días' : '—');
+  set('r-meses-vcm',     mesesVcm !== null ? mesesVcm.toFixed(2).replace('.',',')+' meses' : '—');
+  // Periodos/año como número (fórmula GS)
+  set('r-periodos-anio', alVcto ? '1' : String(periAnio));
+
+  // Tasas — la tasa periódica se calcula sobre periodos/año
+  const tasaNom = ea2nominal(tasaEA, alVcto ? 0 : periAnio);
+  const tasaPer = ea2periodica(tasaEA, alVcto ? 0 : periAnio); // B31 en el GS
+
+  let intPeriodo=0, intTotales=0, intPagados=0, valorFuturo=0, fechaUltPago='—';
+
+  if (nominal > 0 && tasaEA > 0 && plazo) {
+    // ── INTERESES POR PERIODO (B32) — fórmula GS exacta ──────────────────
+    // =SI(B13="Al Vencimiento (PV)"; B3*B31*(B9/B14);
+    //   SI(O(B13="MV";...); B3*B31; 0))
+    // B31 = tasa periódica, B9 = plazo días, B14 = base
+    if (alVcto) {
+      // Al vencimiento: Nominal × TasaPeriódica × (Plazo/Base)
+      intPeriodo = nominal * (tasaPer / 100) * (plazo / parseInt(base));
+    } else {
+      // Periódico: Nominal × TasaPeriódica (tasa ya corresponde al periodo)
+      intPeriodo = nominal * (tasaPer / 100);
+    }
+
+    // ── INTERESES TOTALES — fórmula GS exacta ────────────────────────────
+    // =SI(B13="MV"; B32*(B9/30);
+    //   SI(B13="BV"; B32*(B9/60);
+    //     SI(B13="TV"; B32*(B9/90);
+    //       SI(B13="SV"; B32*(B9/180);
+    //         SI(B13="AV"; B32*(B9/360);
+    //           SI(B13="PV"; B32; 0))))))
+    // B9 = plazo en días
+    switch(periStr) {
+      case '12': intTotales = intPeriodo * (plazo / 30);  break; // MV
+      case '6':  intTotales = intPeriodo * (plazo / 60);  break; // BV
+      case '4':  intTotales = intPeriodo * (plazo / 90);  break; // TV
+      case '2':  intTotales = intPeriodo * (plazo / 180); break; // SV
+      case '1':  intTotales = intPeriodo * (plazo / 360); break; // AV
+      default:   intTotales = intPeriodo;                 break; // Al vencimiento (PV)
+    }
+
+    valorFuturo  = nominal + intTotales;
+    fechaUltPago = fvcm ? fmtFecha(fvcm) : '—';
+
+    // Intereses pagados: proporcional a días corridos
+    if (diasCorr !== null && diasVcm !== null && plazo > 0) {
+      intPagados = intTotales * (diasCorr / plazo);
+    }
+  }
+
+  const rteFuente = intTotales * 0.04;
+  const intNetos  = intTotales - rteFuente;
+  const vfNeto    = valorFuturo - rteFuente;
+
+  let dtoMensual=0, dtoTotal=0, dineroRecibir=0;
+  if (nominal > 0 && diasVcm !== null) {
+    dtoMensual    = nominal * (tasaDto / 100);
+    dtoTotal      = dtoMensual * (diasVcm / 30);
+    dineroRecibir = nominal - dtoTotal;
+  }
+
+  set('r-fecha-ult-pago', fechaUltPago);
+  set('r-int-periodo',    cop(intPeriodo));
+  set('r-dto-mensual',    cop(dtoMensual));
+  set('r-dto-total',      cop(dtoTotal));
+  set('r-dinero-recibir', cop(dineroRecibir));
+
+  set('r2-tasa-ea',      pct(tasaEA, 4));
+  set('r2-tasa-nom',     pct(tasaNom, 4));
+  set('r2-tasa-per',     pct(tasaPer, 4));
+  set('r2-int-periodo',  cop(intPeriodo));
+  set('r2-int-total',    cop(intTotales));
+  set('r2-rte-fuente',   cop(rteFuente));
+  set('r2-int-netos',    cop(intNetos));
+  set('r2-int-pagados',  cop(intPagados));
+  set('r2-valor-futuro', cop(valorFuturo));
+  set('r2-vf-neto',      cop(vfNeto));
+
+  const tasaFIC = parseFloat(sv('s3-tasa-fic')) || 0;
+  let giroFIC=0, utilBruta=0;
+  if (nominal > 0 && tasaFIC > 0 && diasVcm > 0) {
+    // Fórmula GS exacta: =B37 / (1 + B45)^(B18/B14)
+    // B37=ValorFuturo, B45=TasaFIC/100, B18=DiasVcm, B14=Base
+    giroFIC   = valorFuturo / Math.pow(1 + (tasaFIC / 100), diasVcm / parseInt(base));
+    utilBruta = giroFIC - dineroRecibir;
+  }
+  set('r3-giro-fic',   cop(giroFIC));
+  set('r3-util-bruta', cop(utilBruta));
+
+  const numGMF    = parseFloat(sv('s4-num-gmf')) || 1;
+  // GMF sobre Dinero a Recibir (=B26*0,004 donde B26 = dineroRecibir)
+  const costoGMF  = dineroRecibir * 0.004 * numGMF;
+  const movilidad = getGasto('s4-movilidad');
+  const pasajes   = getGasto('s4-pasajes');
+  const comidas   = getGasto('s4-comidas');
+  const bvc       = getGasto('s4-bvc');
+  const docs      = getGasto('s4-docs');
+  const referral  = getGasto('s4-referral');
+  const totalGastos = costoGMF + movilidad + pasajes + comidas + bvc + docs + referral;
+  const utilNeta    = utilBruta - totalGastos;
+
+  set('r4-costo-gmf',    cop(costoGMF));
+  set('r4-total-gastos', cop(totalGastos));
+  set('r4-util-neta',    cop(utilNeta));
+  const eun = $('r4-util-neta');
+  if (eun) eun.style.color = utilNeta >= 0 ? 'var(--ok)' : 'var(--danger)';
+}
+
+function limpiar() {
+  ['s1-nominal','s1-ciudad','s1-oficina','s1-fem','s1-fvcm',
+   's1-tasa-ea','s1-spread','s3-ciudad','s3-oficina','s3-tasa-fic',
+   's4-movilidad','s4-pasajes','s4-comidas','s4-bvc','s4-docs','s4-referral']
+    .forEach(id => { const el=$(id); if(el) el.value=''; });
+  $('r-plazo').value   = '';
+  $('s4-num-gmf').value = '1';
+  $('s1-spread').value  = '0';
+  plazoManual = null;
+  const hoy = new Intl.DateTimeFormat('en-CA', {timeZone:'America/Bogota', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
+  $('s3-fecha-cot').value = hoy;
+  $('s3-fecha-neg').value = hoy;
+  calcular();
+}
+
+/* Focus inicial en auth */
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => { const el=$('auth-code'); if(el) el.focus(); }, 100);
+});
+</script>
+</body>
+</html>
