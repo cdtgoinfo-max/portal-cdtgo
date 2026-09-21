@@ -1,0 +1,421 @@
+<title>Contactos EF · CDTgo</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7c5cfc">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CDTgo">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap">
+
+<style>
+:root {
+  --bg:#0f0d1c;--surface:#1a1730;--surface2:#231f3a;--border:#2e2a4a;
+  --accent:#7c5cfc;--cyan:#4fc3f7;--ok:#26d97f;--warn:#f5a623;--danger:#f47171;
+  --text:#e8e4f8;--muted:#8a84a8;--label:#5a5478;
+  --mono:'IBM Plex Mono',monospace;--sans:'Inter',system-ui,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100%;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(124,92,252,.15) 1px,transparent 1px);background-size:22px 22px;pointer-events:none;z-index:0;}
+
+/* TOPBAR */
+.topbar{position:relative;z-index:10;background:rgba(26,23,48,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;}
+.topbar-brand{display:flex;align-items:center;gap:12px;}
+.brand-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),#4f3ab0);border-radius:10px;display:grid;place-items:center;font-size:18px;box-shadow:0 0 16px rgba(124,92,252,.4);}
+.brand-name{font-family:var(--mono);font-size:15px;font-weight:600;letter-spacing:.5px;}
+.brand-sub{font-size:11px;color:var(--muted);font-family:var(--mono);}
+.topbar-badge{display:flex;align-items:center;gap:6px;background:rgba(38,217,127,.1);border:1px solid rgba(38,217,127,.25);border-radius:20px;padding:5px 12px;font-family:var(--mono);font-size:11px;color:var(--ok);font-weight:600;}
+.topbar-badge::before{content:'';width:6px;height:6px;background:var(--ok);border-radius:50%;box-shadow:0 0 6px var(--ok);}
+.back-link{font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s;}
+.back-link:hover{color:var(--accent);}
+
+/* MAIN */
+main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:40px 24px 64px;}
+
+/* AUTH */
+.auth-overlay{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;}
+.auth-overlay::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,rgba(124,92,252,.15) 1px,transparent 1px);background-size:22px 22px;pointer-events:none;}
+.auth-box{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:420px;box-shadow:0 32px 80px rgba(0,0,0,.5);}
+.auth-icon{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),#4f3ab0);border-radius:16px;display:grid;place-items:center;font-size:26px;margin:0 auto 20px;box-shadow:0 0 24px rgba(124,92,252,.4);}
+.auth-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:6px;}
+.auth-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:28px;font-family:var(--mono);}
+.auth-step-indicator{display:flex;gap:6px;justify-content:center;margin-bottom:24px;}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .3s;}
+.step-dot.active{background:var(--accent);box-shadow:0 0 8px var(--accent);}
+.step-dot.done{background:var(--ok);}
+
+.field-group{margin-bottom:18px;}
+.field-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--label);margin-bottom:8px;display:block;}
+.field-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;transition:border-color .2s;}
+.field-input:focus{border-color:var(--accent);}
+.field-input::placeholder{color:var(--label);}
+
+.auth-btn{width:100%;background:linear-gradient(135deg,var(--accent),#5a3fd4);border:none;border-radius:10px;padding:14px;font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;cursor:pointer;letter-spacing:.05em;transition:opacity .2s,transform .2s;}
+.auth-btn:hover{opacity:.9;transform:translateY(-1px);}
+.auth-error{font-family:var(--mono);font-size:11px;color:var(--danger);text-align:center;margin-top:12px;min-height:16px;}
+
+/* FORM PAGE */
+.page-header{margin-bottom:36px;}
+.page-eyebrow{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan);background:rgba(79,195,247,.1);border:1px solid rgba(79,195,247,.2);border-radius:20px;padding:4px 14px;margin-bottom:14px;}
+.page-title{font-size:clamp(22px,4vw,32px);font-weight:700;line-height:1.2;background:linear-gradient(135deg,var(--text) 40%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.page-sub{font-size:13px;color:var(--muted);}
+
+.section-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--label);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:20px;}
+
+.form-grid{display:grid;gap:18px;}
+.form-grid.cols-2{grid-template-columns:1fr 1fr;}
+.form-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+
+.f-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--label);margin-bottom:7px;display:block;}
+.f-label span{color:var(--danger);margin-left:2px;}
+.f-input, .f-select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .2s;}
+.f-input:focus, .f-select:focus{border-color:var(--accent);}
+.f-input::placeholder{color:var(--label);}
+.f-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a5478' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer;}
+.f-select option{background:var(--surface2);color:var(--text);}
+
+.submit-row{display:flex;justify-content:flex-end;gap:12px;margin-top:8px;}
+.btn-limpiar{background:transparent;border:1px solid var(--border);border-radius:10px;padding:12px 24px;font-family:var(--mono);font-size:12px;color:var(--muted);cursor:pointer;transition:border-color .2s,color .2s;}
+.btn-limpiar:hover{border-color:var(--muted);color:var(--text);}
+.btn-guardar{background:linear-gradient(135deg,var(--accent),#5a3fd4);border:none;border-radius:10px;padding:12px 28px;font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;gap:8px;transition:opacity .2s,transform .2s;}
+.btn-guardar:hover{opacity:.9;transform:translateY(-1px);}
+.btn-guardar:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+/* TOAST */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 24px;font-family:var(--mono);font-size:12px;box-shadow:0 16px 48px rgba(0,0,0,.4);z-index:200;transition:transform .3s ease;display:flex;align-items:center;gap:10px;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:rgba(38,217,127,.4);color:var(--ok);}
+.toast.err{border-color:rgba(244,113,113,.4);color:var(--danger);}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.footer-left{font-family:var(--mono);font-size:11px;color:var(--label);}
+
+@media(max-width:600px){
+  .topbar{padding:0 16px;}
+  main{padding:28px 16px 48px;}
+  .form-grid.cols-2,.form-grid.cols-3{grid-template-columns:1fr;}
+  .auth-box{padding:28px 20px;}
+}
+</style>
+
+<!-- AUTH OVERLAY -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-icon">🔐</div>
+    <div class="auth-title">Acceso restringido</div>
+    <div class="auth-sub" id="authSubtitle">Portal Interno · CDTgo</div>
+    <div class="auth-step-indicator">
+      <div class="step-dot active" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="step1">
+      <div class="field-group">
+        <label class="field-label">Código de acceso</label>
+        <input class="field-input" type="password" id="s1input" placeholder="••••••••••" autocomplete="off">
+      </div>
+      <button class="auth-btn" onclick="checkStep1()">Continuar →</button>
+      <div class="auth-error" id="s1err"></div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" hidden>
+      <div class="field-group">
+        <label class="field-label">Email autorizado</label>
+        <input class="field-input" type="email" id="s2input" placeholder="usuario@cdtgo.com" autocomplete="off">
+      </div>
+      <button class="auth-btn" onclick="checkStep2()">Continuar →</button>
+      <div class="auth-error" id="s2err"></div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" hidden>
+      <div class="field-group">
+        <label class="field-label">¿Dónde trabajaron juntos?</label>
+        <input class="field-input" type="text" id="s3input" placeholder="Nombre de la empresa" autocomplete="off">
+      </div>
+      <button class="auth-btn" onclick="checkStep3()">Ingresar →</button>
+      <div class="auth-error" id="s3err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">🏦</div>
+    <div>
+      <div class="brand-name">CDTgo</div>
+      <div class="brand-sub">Contactos EF</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <a class="back-link" href="index.html">← Inicio</a>
+    <div class="topbar-badge">✓ AUTENTICADO</div>
+  </div>
+</header>
+
+<main>
+  <div class="page-header">
+    <div class="page-eyebrow">Gestión de contactos</div>
+    <h1 class="page-title">Contactos Entidades Financieras</h1>
+    <p class="page-sub">Registra gerentes y funcionarios visitados en campo.</p>
+  </div>
+
+  <form id="contactForm" onsubmit="return false;">
+
+    <!-- BLOQUE 1: ENTIDAD -->
+    <div class="section-label">Entidad y visita</div>
+    <div class="form-card">
+      <div class="form-grid cols-3">
+        <div>
+          <label class="f-label">Entidad <span>*</span></label>
+          <select class="f-select" id="fEntidad" required>
+            <option value="">Cargando…</option>
+          </select>
+        </div>
+        <div>
+          <label class="f-label">Oficina</label>
+          <input class="f-input" type="text" id="fOficina" placeholder="Ej: Principal, Norte…">
+        </div>
+        <div>
+          <label class="f-label">Fecha visita <span>*</span></label>
+          <input class="f-input" type="date" id="fFecha" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOQUE 2: CONTACTO -->
+    <div class="section-label">Datos del funcionario</div>
+    <div class="form-card">
+      <div class="form-grid cols-2">
+        <div>
+          <label class="f-label">Nombre <span>*</span></label>
+          <input class="f-input" type="text" id="fNombre" placeholder="Nombre(s)" required>
+        </div>
+        <div>
+          <label class="f-label">Apellidos <span>*</span></label>
+          <input class="f-input" type="text" id="fApellidos" placeholder="Apellido(s)" required>
+        </div>
+        <div>
+          <label class="f-label">Cargo</label>
+          <input class="f-input" type="text" id="fCargo" placeholder="Ej: Gerente Comercial">
+        </div>
+        <div>
+          <label class="f-label">Email <span>*</span></label>
+          <input class="f-input" type="email" id="fEmail" placeholder="contacto@banco.com" required>
+        </div>
+        <div>
+          <label class="f-label">Celular</label>
+          <input class="f-input" type="tel" id="fCelular" placeholder="300 000 0000">
+        </div>
+        <div>
+          <label class="f-label">PBX</label>
+          <input class="f-input" type="tel" id="fPbx" placeholder="(601) 000 0000">
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOQUE 3: UBICACIÓN -->
+    <div class="section-label">Ubicación y web</div>
+    <div class="form-card">
+      <div class="form-grid cols-2">
+        <div>
+          <label class="f-label">Dirección</label>
+          <input class="f-input" type="text" id="fDireccion" placeholder="Calle / Carrera / Av.">
+        </div>
+        <div>
+          <label class="f-label">Ciudad <span>*</span></label>
+          <input class="f-input" type="text" id="fCiudad" placeholder="Bogotá, Medellín…" required>
+        </div>
+        <div>
+          <label class="f-label">Website</label>
+          <input class="f-input" type="url" id="fWebsite" placeholder="https://…">
+        </div>
+        <div>
+          <label class="f-label">Analista CDTgo</label>
+          <input class="f-input" type="text" id="fAnalista" placeholder="Nombre del analista">
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-row">
+      <button type="button" class="btn-limpiar" onclick="limpiarForm()">Limpiar</button>
+      <button type="button" class="btn-guardar" id="btnGuardar" onclick="guardarContacto()">
+        <span>💾</span> Guardar y enviar email
+      </button>
+    </div>
+
+  </form>
+</main>
+
+<footer>
+  <div class="footer-left">CDTgo.com · Portal Interno · Confidencial</div>
+  <div class="footer-left" id="footerDate"></div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyan4y-UlRpWPL8op__3hMr7xaZV3-171IxCca5JkLnJD_hh0D1USyjErlSBCugw1gs2g/exec';
+
+// ── AUTH ─────────────────────────────────────────────────────
+const S1 = atob('UGxtUWF6MjAyNiQ=');
+const S2 = ['mcastrillon@cdtgo.com','jujueta@cdtgo.com'];
+const S3 = 'suma valores';
+
+let authStep = 1;
+
+function setStep(n) {
+  authStep = n;
+  document.getElementById('step1').hidden = n !== 1;
+  document.getElementById('step2').hidden = n !== 2;
+  document.getElementById('step3').hidden = n !== 3;
+  ['dot1','dot2','dot3'].forEach((id,i) => {
+    const d = document.getElementById(id);
+    d.className = 'step-dot' + (i+1 < n ? ' done' : i+1 === n ? ' active' : '');
+  });
+  const subs = ['Paso 1 de 3 · Código','Paso 2 de 3 · Email','Paso 3 de 3 · Verificación'];
+  document.getElementById('authSubtitle').textContent = subs[n-1];
+  setTimeout(() => {
+    const inp = document.getElementById('s'+n+'input');
+    if(inp) inp.focus();
+  }, 50);
+}
+
+function checkStep1() {
+  const v = document.getElementById('s1input').value;
+  if(v === S1) { document.getElementById('s1err').textContent=''; setStep(2); }
+  else { document.getElementById('s1err').textContent='Código incorrecto.'; }
+}
+function checkStep2() {
+  const v = document.getElementById('s2input').value.trim().toLowerCase();
+  if(S2.includes(v)) { document.getElementById('s2err').textContent=''; setStep(3); }
+  else { document.getElementById('s2err').textContent='Email no autorizado.'; }
+}
+function checkStep3() {
+  const v = document.getElementById('s3input').value.trim().toLowerCase();
+  if(v === S3) {
+    document.getElementById('s3err').textContent='';
+    document.getElementById('authOverlay').style.display='none';
+    iniciarApp();
+  } else {
+    document.getElementById('s3err').textContent='Respuesta incorrecta.';
+  }
+}
+
+// Enter key en inputs
+['s1input','s2input','s3input'].forEach((id,i) => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if(e.key==='Enter') [checkStep1,checkStep2,checkStep3][i]();
+  });
+});
+
+// ── APP ───────────────────────────────────────────────────────
+function iniciarApp() {
+  // Fecha hoy Colombia
+  const hoy = new Intl.DateTimeFormat('en-CA', {
+    timeZone:'America/Bogota', year:'numeric', month:'2-digit', day:'2-digit'
+  }).format(new Date());
+  document.getElementById('fFecha').value = hoy;
+
+  // Footer date
+  const d = new Intl.DateTimeFormat('es-CO', {
+    timeZone:'America/Bogota', year:'numeric', month:'long', day:'numeric'
+  }).format(new Date());
+  document.getElementById('footerDate').textContent = d;
+
+  // Cargar entidades desde GAS
+  cargarEntidades();
+}
+
+function cargarEntidades() {
+  const sel = document.getElementById('fEntidad');
+  fetch(GAS_URL + '?action=getEntidades')
+    .then(r => r.json())
+    .then(data => {
+      sel.innerHTML = '<option value="">Selecciona entidad…</option>';
+      data.forEach(e => {
+        const opt = document.createElement('option');
+        opt.value = e; opt.textContent = e;
+        sel.appendChild(opt);
+      });
+    })
+    .catch(() => {
+      sel.innerHTML = '<option value="">Error al cargar — recarga</option>';
+    });
+}
+
+function guardarContacto() {
+  const campos = {
+    Entidad: document.getElementById('fEntidad').value,
+    Oficina: document.getElementById('fOficina').value,
+    Fecha_Visita: document.getElementById('fFecha').value,
+    Nombre: document.getElementById('fNombre').value.trim(),
+    Apellidos: document.getElementById('fApellidos').value.trim(),
+    Cargo: document.getElementById('fCargo').value.trim(),
+    Direccion: document.getElementById('fDireccion').value.trim(),
+    Ciudad: document.getElementById('fCiudad').value.trim(),
+    Celular: document.getElementById('fCelular').value.trim(),
+    Pbx: document.getElementById('fPbx').value.trim(),
+    email: document.getElementById('fEmail').value.trim(),
+    website: document.getElementById('fWebsite').value.trim(),
+    AnalistaCDTgo: document.getElementById('fAnalista').value.trim()
+  };
+
+  if(!campos.Entidad || !campos.Nombre || !campos.Apellidos || !campos.email || !campos.Ciudad) {
+    showToast('Completa los campos obligatorios (*)', 'err'); return;
+  }
+
+  const btn = document.getElementById('btnGuardar');
+  btn.disabled = true;
+  btn.innerHTML = '<span>⏳</span> Guardando…';
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    body: JSON.stringify({action:'guardar', datos: campos})
+  })
+  .then(r => r.json())
+  .then(res => {
+    if(res.ok) {
+      showToast('✓ Contacto guardado · Email enviado', 'ok');
+      limpiarForm();
+    } else {
+      showToast('Error: ' + (res.error || 'intenta de nuevo'), 'err');
+    }
+  })
+  .catch(() => showToast('Error de conexión — intenta de nuevo', 'err'))
+  .finally(() => {
+    btn.disabled = false;
+    btn.innerHTML = '<span>💾</span> Guardar y enviar email';
+  });
+}
+
+function limpiarForm() {
+  ['fEntidad','fOficina','fNombre','fApellidos','fCargo','fDireccion',
+   'fCiudad','fCelular','fPbx','fEmail','fWebsite','fAnalista'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el.tagName==='SELECT') el.selectedIndex=0; else el.value='';
+  });
+  const hoy = new Intl.DateTimeFormat('en-CA', {
+    timeZone:'America/Bogota', year:'numeric', month:'2-digit', day:'2-digit'
+  }).format(new Date());
+  document.getElementById('fFecha').value = hoy;
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// PWA
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
