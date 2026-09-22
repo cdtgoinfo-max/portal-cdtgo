@@ -89,6 +89,25 @@ main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:40px 24px
 .toast.ok{border-color:rgba(38,217,127,.4);color:var(--ok);}
 .toast.err{border-color:rgba(244,113,113,.4);color:var(--danger);}
 
+/* CONSULTAR */
+.consultar-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-top:32px;}
+.consultar-row{display:flex;gap:10px;align-items:flex-end;}
+.consultar-row .f-select{flex:1;}
+.btn-consultar{background:linear-gradient(135deg,#26d97f,#1ab56a);border:none;border-radius:10px;padding:11px 22px;font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap;transition:opacity .2s,transform .2s;flex-shrink:0;}
+.btn-consultar:hover{opacity:.9;transform:translateY(-1px);}
+.btn-consultar:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.results-area{margin-top:22px;display:none;}
+.results-count{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:14px;letter-spacing:.05em;}
+.contact-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;}
+.cc-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.cc-avatar{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),#4f3ab0);border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.cc-name{font-size:14px;font-weight:700;color:var(--text);}
+.cc-cargo{font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px;}
+.cc-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;}
+.cc-field{font-size:12px;color:var(--muted);}
+.cc-field strong{color:var(--text);font-weight:600;}
+.cc-fecha{display:inline-block;font-family:var(--mono);font-size:10px;color:var(--accent);background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.25);border-radius:20px;padding:3px 10px;margin-bottom:10px;}
+
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 .footer-left{font-family:var(--mono);font-size:11px;color:var(--label);}
 
@@ -251,6 +270,27 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:18
     </div>
 
   </form>
+
+  <!-- PANEL CONSULTAR -->
+  <div class="section-label" style="margin-top:40px;">Consultar contactos</div>
+  <div class="consultar-card">
+    <div class="consultar-row">
+      <div style="flex:1;">
+        <label class="f-label">Filtrar por entidad</label>
+        <select class="f-select" id="cEntidad">
+          <option value="">Selecciona entidad…</option>
+        </select>
+      </div>
+      <button class="btn-consultar" id="btnConsultar" onclick="consultarContactos()">
+        🔍 Consultar
+      </button>
+    </div>
+    <div class="results-area" id="resultsArea">
+      <div class="results-count" id="resultsCount"></div>
+      <div id="resultsList"></div>
+    </div>
+  </div>
+
 </main>
 
 <footer>
@@ -262,7 +302,7 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:18
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxDJeh67BiqEolYJhwrXJHFsIw0A9PF7dIL-r0uDuVDXCnUCANaf2qTT0ciZ3bynL45Ww/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbz6pXnJdHh5fBrHOHcsmPSYIJniclHRKQFKwbMhZE2qUHCcXzeDycsofNXcVzvMuQLmpw/exec';
 
 // ── AUTH ─────────────────────────────────────────────────────
 const S1 = atob('UGxtUWF6MjAyNiQ=');
@@ -335,19 +375,27 @@ function iniciarApp() {
 }
 
 function cargarEntidades() {
-  const sel = document.getElementById('fEntidad');
   fetch(GAS_URL + '?action=getEntidades')
     .then(r => r.json())
     .then(data => {
+      // Dropdown formulario
+      const sel = document.getElementById('fEntidad');
       sel.innerHTML = '<option value="">Selecciona entidad…</option>';
+      // Dropdown consultar
+      const csel = document.getElementById('cEntidad');
+      csel.innerHTML = '<option value="">Selecciona entidad…</option>';
       data.forEach(e => {
-        const opt = document.createElement('option');
-        opt.value = e; opt.textContent = e;
-        sel.appendChild(opt);
+        const opt1 = document.createElement('option');
+        opt1.value = e; opt1.textContent = e;
+        sel.appendChild(opt1);
+        const opt2 = document.createElement('option');
+        opt2.value = e; opt2.textContent = e;
+        csel.appendChild(opt2);
       });
     })
     .catch(() => {
-      sel.innerHTML = '<option value="">Error al cargar — recarga</option>';
+      document.getElementById('fEntidad').innerHTML = '<option value="">Error al cargar — recarga</option>';
+      document.getElementById('cEntidad').innerHTML = '<option value="">Error al cargar — recarga</option>';
     });
 }
 
@@ -414,6 +462,69 @@ function showToast(msg, type) {
   t.className = 'toast ' + type;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+// ── CONSULTAR ────────────────────────────────────────────────
+function consultarContactos() {
+  const entidad = document.getElementById('cEntidad').value;
+  if (!entidad) { showToast('Selecciona una entidad para consultar', 'err'); return; }
+
+  const btn = document.getElementById('btnConsultar');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Buscando…';
+
+  fetch(GAS_URL + '?action=consultarContactos&entidad=' + encodeURIComponent(entidad))
+    .then(r => r.json())
+    .then(data => {
+      mostrarResultados(entidad, data);
+    })
+    .catch(() => showToast('Error de conexión al consultar', 'err'))
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = '🔍 Consultar';
+    });
+}
+
+function mostrarResultados(entidad, data) {
+  const area = document.getElementById('resultsArea');
+  const count = document.getElementById('resultsCount');
+  const list = document.getElementById('resultsList');
+
+  area.style.display = 'block';
+
+  if (!data.length) {
+    count.textContent = 'Sin resultados para ' + entidad;
+    list.innerHTML = '<div class="contact-card" style="text-align:center;color:var(--muted);font-family:var(--mono);font-size:12px;">No se encontraron contactos registrados.</div>';
+    return;
+  }
+
+  count.textContent = data.length + ' contacto' + (data.length !== 1 ? 's' : '') + ' · ' + entidad;
+
+  list.innerHTML = data.map(c => {
+    const iniciales = ((c.Nombre||'?')[0] + (c.Apellidos||'?')[0]).toUpperCase();
+    const fecha = c.Fecha_Visita ? new Date(c.Fecha_Visita + 'T12:00:00').toLocaleDateString('es-CO', {year:'numeric',month:'short',day:'numeric'}) : '';
+    return `
+      <div class="contact-card">
+        <div class="cc-header">
+          <div class="cc-avatar">${iniciales}</div>
+          <div>
+            <div class="cc-name">${c.Nombre || ''} ${c.Apellidos || ''}</div>
+            <div class="cc-cargo">${c.Cargo || '—'}</div>
+          </div>
+        </div>
+        ${fecha ? `<span class="cc-fecha">📅 Visita: ${fecha}</span>` : ''}
+        ${c.Oficina ? `<span class="cc-fecha" style="background:rgba(79,195,247,.1);border-color:rgba(79,195,247,.25);color:var(--cyan);margin-left:6px;">🏢 ${c.Oficina}</span>` : ''}
+        <div class="cc-fields">
+          ${c.email ? `<div class="cc-field">✉ <strong>${c.email}</strong></div>` : ''}
+          ${c.Celular ? `<div class="cc-field">📱 <strong>${c.Celular}</strong></div>` : ''}
+          ${c.Pbx ? `<div class="cc-field">☎ PBX <strong>${c.Pbx}</strong></div>` : ''}
+          ${c.Ciudad ? `<div class="cc-field">📍 <strong>${c.Ciudad}</strong></div>` : ''}
+          ${c.Direccion ? `<div class="cc-field" style="grid-column:span 2;">🏠 ${c.Direccion}</div>` : ''}
+          ${c.website ? `<div class="cc-field" style="grid-column:span 2;">🌐 <a href="${c.website}" target="_blank" style="color:var(--accent);">${c.website}</a></div>` : ''}
+          ${c.AnalistaCDTgo ? `<div class="cc-field">👤 Analista: <strong>${c.AnalistaCDTgo}</strong></div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
 }
 
 // PWA
