@@ -46,6 +46,22 @@
   .field-value.rate{font-family:var(--mono);color:var(--accent2)}
   .field-value.empty{color:var(--label);font-style:italic}
   .field.wide{grid-column:1/-1}
+
+  /* EDIT FIELDS */
+  .f-edit-input{width:100%;background:var(--surface2);border:1px solid var(--accent);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:14px;font-weight:600;padding:8px 12px;outline:none;transition:border-color .15s;}
+  .f-edit-input:focus{border-color:var(--accent2);}
+  .f-edit-select{width:100%;background:var(--surface2);border:1px solid var(--accent);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 12px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a5478' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+  .f-edit-select option{background:var(--surface2);color:var(--text);}
+  .edit-label-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--accent);background:rgba(124,92,252,.12);border:1px solid rgba(124,92,252,.3);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;text-transform:uppercase;}
+
+  /* SAVE ROW */
+  .save-row{display:none;grid-column:1/-1;margin-top:6px;display:none;gap:10px;align-items:center;justify-content:flex-end;}
+  .btn-save{background:linear-gradient(135deg,var(--accent),#5a3fd4);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 24px;cursor:pointer;transition:opacity .15s,transform .1s;display:flex;align-items:center;gap:8px;}
+  .btn-save:hover{opacity:.9;transform:translateY(-1px);}
+  .btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+  .save-msg{font-family:var(--mono);font-size:11px;color:var(--ok);display:none;}
+  .save-msg.err{color:#f47171;}
+
   @media(max-width:500px){.search-box{flex-direction:column;align-items:stretch}.search-label{display:none}#btn-consultar{width:100%;text-align:center}.section-body{grid-template-columns:1fr 1fr}}
   @media(max-width:360px){.section-body{grid-template-columns:1fr}}
 </style>
@@ -63,6 +79,8 @@
   </div>
   <div id="estado"></div>
   <div id="ts-strip"><div class="ts-id" id="ts-id-val"></div><div class="ts-date" id="ts-date-val"></div></div>
+
+  <!-- SEC 1 -->
   <div class="section" id="sec1">
     <div class="section-header"><div class="section-num">1</div><div class="section-title">Datos del Lead</div></div>
     <div class="section-body">
@@ -71,6 +89,8 @@
       <div class="field"><div class="field-label">Celular</div><div class="field-value" id="f-celular"></div></div>
     </div>
   </div>
+
+  <!-- SEC 2 -->
   <div class="section" id="sec2">
     <div class="section-header"><div class="section-num">2</div><div class="section-title">Condiciones del CDT</div></div>
     <div class="section-body">
@@ -91,6 +111,8 @@
       <div class="field"><div class="field-label">Tasa Periódica</div><div class="field-value rate" id="f-tperiodica"></div></div>
     </div>
   </div>
+
+  <!-- SEC 3 -->
   <div class="section" id="sec3">
     <div class="section-header"><div class="section-num">3</div><div class="section-title">Valoración</div></div>
     <div class="section-body">
@@ -106,34 +128,85 @@
       <div class="field"><div class="field-label">Dinero a Recibir</div><div class="field-value money" id="f-dinero"></div></div>
     </div>
   </div>
+
+  <!-- SEC 4 — Overhead con Tasa FIC editable -->
   <div class="section" id="sec4">
     <div class="section-header"><div class="section-num">4</div><div class="section-title">Overhead CDTgo</div></div>
     <div class="section-body">
       <div class="field"><div class="field-label">Vr. Giro Final CDTgo</div><div class="field-value money" id="f-giro-final"></div></div>
-      <div class="field"><div class="field-label">Tasa FIC CDTgo</div><div class="field-value rate" id="f-tasa-fic"></div></div>
+      <div class="field">
+        <div class="field-label">Tasa FIC CDTgo <span class="edit-label-tag">editable</span></div>
+        <input class="f-edit-input" type="number" id="edit-tasa-fic" step="0.01" min="0" max="100" placeholder="18.00">
+      </div>
       <div class="field"><div class="field-label">Valor Giro FIC Est.</div><div class="field-value money" id="f-giro-fic"></div></div>
       <div class="field"><div class="field-label">Utilidad Bruta Est.</div><div class="field-value money" id="f-util-bruta"></div></div>
     </div>
   </div>
+
+  <!-- SEC 5 — Seguimiento con Especialista, EstadoLead y ObservacionLead editables -->
   <div class="section" id="sec5">
     <div class="section-header"><div class="section-num">5</div><div class="section-title">Seguimiento</div></div>
     <div class="section-body">
-      <div class="field"><div class="field-label">Especialista</div><div class="field-value" id="f-especialista"></div></div>
-      <div class="field"><div class="field-label">Estado Lead</div><div class="field-value" id="f-estado-lead"></div></div>
+      <div class="field">
+        <div class="field-label">Especialista <span class="edit-label-tag">editable</span></div>
+        <select class="f-edit-select" id="edit-especialista">
+          <option value="">— Seleccionar —</option>
+          <option value="MC">MC</option>
+          <option value="JU">JU</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label">Estado Lead <span class="edit-label-tag">editable</span></div>
+        <select class="f-edit-select" id="edit-estado-lead">
+          <option value="">— Seleccionar —</option>
+          <option value="Acepta">Acepta</option>
+          <option value="Contactado">Contactado</option>
+          <option value="Analizando">Analizando</option>
+          <option value="Declina">Declina</option>
+          <option value="No Responde">No Responde</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label">Observación Lead <span class="edit-label-tag">editable</span></div>
+        <select class="f-edit-select" id="edit-obs-lead">
+          <option value="">— Seleccionar —</option>
+          <option value="CDT Comprado">CDT Comprado</option>
+          <option value="Esperar al Vcmto">Esperar al Vcmto</option>
+          <option value="Competencia">Competencia</option>
+          <option value="Tercero">Tercero</option>
+          <option value="Inseguridad Proceso">Inseguridad Proceso</option>
+          <option value="Definiendo Fecha">Definiendo Fecha</option>
+          <option value="Indecisión">Indecisión</option>
+        </select>
+      </div>
       <div class="field"><div class="field-label">Email Automático</div><div class="field-value" id="f-email-auto"></div></div>
       <div class="field"><div class="field-label">SARLAFT</div><div class="field-value" id="f-sarlaft"></div></div>
       <div class="field"><div class="field-label">Utilidad Neta Est.</div><div class="field-value money" id="f-util-neta"></div></div>
       <div class="field"><div class="field-label">Rt. Neta Per. Est.</div><div class="field-value rate" id="f-rt-neta"></div></div>
+
+      <!-- SAVE ROW -->
+      <div class="field wide" id="save-row" style="display:none;">
+        <div style="display:flex;align-items:center;gap:14px;justify-content:flex-end;flex-wrap:wrap;">
+          <span class="save-msg" id="save-msg"></span>
+          <button class="btn-save" id="btn-save" onclick="guardarCambios()">
+            💾 Guardar cambios
+          </button>
+        </div>
+      </div>
     </div>
   </div>
+
 </div>
 <script>
 const GAS_URL='https://script.google.com/macros/s/AKfycbxJws9P50VlP2y907ow4vKweiMfKUmEqBcybWipypPy22CnPex9DnLbI9qqvbv9nWgB/exec';
+let currentRowIndex = null;
+
 function fmtCOP(v){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));if(isNaN(n))return v;return'$ '+n.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0})}
 function fmtPct(v,raw){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(',','.'));if(isNaN(n))return v+' %';const d=(!raw&&n>0&&n<1)?n*100:n;return d.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:4})+' %'}
 function set(id,v){const el=document.getElementById(id);if(el)el.innerHTML=(!v&&v!==0)||String(v).trim()===''?'<span class="empty">—</span>':String(v)}
 function setCOP(id,v){set(id,fmtCOP(v))}
-function setPct(id,v){set(id,fmtPct(v))}
+function setPct(id,v,raw){set(id,fmtPct(v,raw))}
+
 function consultar(){
   const id=document.getElementById('id-input').value.trim();
   if(!id||id.length<6){showError('Ingresa el ID de 8 dígitos.');return}
@@ -147,11 +220,16 @@ function consultar(){
   script.src=GAS_URL+'?id='+encodeURIComponent(id)+'&callback='+cbName;
   document.head.appendChild(script);
 }
+
 function renderLead(d){
   const parts=(d.A||'').split(' - ');
   document.getElementById('ts-id-val').textContent=parts[1]||'';
   document.getElementById('ts-date-val').textContent=parts[0]||'';
   document.getElementById('ts-strip').style.display='flex';
+
+  // Guardar índice de fila para el update
+  currentRowIndex = d._row || null;
+
   set('f-nombre',d.B);set('f-email',d.C);set('f-celular',d.D);
   set('f-emisor',d.E);setCOP('f-nominal',d.F);set('f-tipo-emision',d.G);
   set('f-ciudad',d.H);set('f-oficina',d.I);set('f-fem',fmtFecha(d.J));set('f-fvcm',fmtFecha(d.K));
@@ -162,25 +240,94 @@ function renderLead(d){
   set('f-dias-vcm',d.T?d.T+' días':'');set('f-meses-vcm',d.U?d.U+' meses':'');
   setCOP('f-int-totales',d.AC);setCOP('f-int-pagados',d.AF);setCOP('f-vf',d.AG);
   setCOP('f-dto-men',d.W);setCOP('f-dto-tot',d.X);setCOP('f-dinero',d.Y);
-  setCOP('f-giro-final',d.AO);setPct('f-tasa-fic',d.AP,true);setCOP('f-giro-fic',d.AQ);setCOP('f-util-bruta',d.AR);
-  set('f-especialista',d.AS);set('f-estado-lead',d.AT);set('f-email-auto',d.AU);set('f-sarlaft',d.AV);
+  setCOP('f-giro-final',d.AO);setCOP('f-giro-fic',d.AQ);setCOP('f-util-bruta',d.AR);
+  set('f-email-auto',d.AU);set('f-sarlaft',d.AV);
   setCOP('f-util-neta',d.BF);setPct('f-rt-neta',d.BG,true);
+
+  // Cargar campos editables
+  const tasaFic = d.AP ? parseFloat(String(d.AP).replace(',','.')) : 18;
+  document.getElementById('edit-tasa-fic').value = isNaN(tasaFic) ? 18 : (tasaFic < 1 ? (tasaFic*100).toFixed(2) : tasaFic);
+
+  setSelectVal('edit-especialista', d.AS);
+  setSelectVal('edit-estado-lead', d.AT);
+  setSelectVal('edit-obs-lead', d.AU_obs || d.AU || '');
+
+  document.getElementById('save-row').style.display='block';
+  document.getElementById('save-msg').style.display='none';
+
   ['sec1','sec2','sec3','sec4','sec5'].forEach(id=>document.getElementById(id).style.display='block');
 }
-function hideResults(){document.getElementById('ts-strip').style.display='none';['sec1','sec2','sec3','sec4','sec5'].forEach(id=>document.getElementById(id).style.display='none')}
+
+function setSelectVal(id, val) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  const v = String(val||'').trim();
+  for (let i=0; i<sel.options.length; i++) {
+    if (sel.options[i].value === v) { sel.selectedIndex = i; return; }
+  }
+  sel.selectedIndex = 0;
+}
+
+function guardarCambios(){
+  const id = document.getElementById('id-input').value.trim();
+  if (!id) return;
+
+  const tasaFic = parseFloat(document.getElementById('edit-tasa-fic').value);
+  const especialista = document.getElementById('edit-especialista').value;
+  const estadoLead = document.getElementById('edit-estado-lead').value;
+  const obsLead = document.getElementById('edit-obs-lead').value;
+
+  const btn = document.getElementById('btn-save');
+  const msg = document.getElementById('save-msg');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Guardando…';
+  msg.style.display = 'none';
+
+  const cbName = 'cbSave_' + Date.now();
+  const script = document.createElement('script');
+  const timer = setTimeout(()=>{cleanup();showSaveMsg('Tiempo agotado — intenta de nuevo','err');},10000);
+  function cleanup(){clearTimeout(timer);delete window[cbName];if(script.parentNode)script.parentNode.removeChild(script);btn.disabled=false;btn.innerHTML='💾 Guardar cambios';}
+  window[cbName] = function(res){
+    cleanup();
+    if(res.ok){showSaveMsg('✓ Cambios guardados','ok');}
+    else{showSaveMsg('Error: '+(res.error||'intenta de nuevo'),'err');}
+  };
+  script.onerror = function(){cleanup();showSaveMsg('Error de conexión','err');};
+  script.src = GAS_URL
+    + '?action=update'
+    + '&id=' + encodeURIComponent(id)
+    + '&tasaFic=' + encodeURIComponent(isNaN(tasaFic)?18:tasaFic)
+    + '&especialista=' + encodeURIComponent(especialista)
+    + '&estadoLead=' + encodeURIComponent(estadoLead)
+    + '&obsLead=' + encodeURIComponent(obsLead)
+    + '&callback=' + cbName;
+  document.head.appendChild(script);
+}
+
+function showSaveMsg(txt, type){
+  const msg = document.getElementById('save-msg');
+  msg.textContent = txt;
+  msg.className = 'save-msg' + (type==='err'?' err':'');
+  msg.style.display = 'inline';
+}
+
+function hideResults(){
+  document.getElementById('ts-strip').style.display='none';
+  document.getElementById('save-row').style.display='none';
+  ['sec1','sec2','sec3','sec4','sec5'].forEach(id=>document.getElementById(id).style.display='none');
+  currentRowIndex=null;
+}
 function showLoading(msg){const el=document.getElementById('estado');el.className='loading';el.textContent=msg;el.style.display='block'}
 function showError(msg){const el=document.getElementById('estado');el.className='error';el.textContent='✕  '+msg;el.style.display='block'}
 function clearEstado(){const el=document.getElementById('estado');el.style.display='none';el.className=''}
 function fmtFecha(v){
   if(!v)return'—';
   const s=String(v);
-  // Si ya viene en formato dd/mm/yy o dd/mm/yyyy, lo dejamos
   if(/^\d{2}\/\d{2}/.test(s))return s;
-  // Si viene en formato ISO (2026-04-27T...)
   const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(m)return m[3]+'/'+m[2]+'/'+m[1];
   return s;
-}  
+}
 document.getElementById('id-input').addEventListener('keydown',e=>{if(e.key==='Enter')consultar()});
 </script>
 </body>
