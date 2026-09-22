@@ -128,7 +128,7 @@
   </div>
 </div>
 <script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbyLNtTuv6miUlv1bG0fmIsYZ1NmH5EJ_k8y9asN0xfN-rZ3_J3DkvDMcfy_56g2jeQA/exec';
+const GAS_URL='https://script.google.com/macros/s/AKfycbxJws9P50VlP2y907ow4vKweiMfKUmEqBcybWipypPy22CnPex9DnLbI9qqvbv9nWgB/exec';
 function fmtCOP(v){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));if(isNaN(n))return v;return'$ '+n.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0})}
 function fmtPct(v,raw){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(',','.'));if(isNaN(n))return v+' %';const d=(!raw&&n>0&&n<1)?n*100:n;return d.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:4})+' %'}
 function set(id,v){const el=document.getElementById(id);if(el)el.innerHTML=(!v&&v!==0)||String(v).trim()===''?'<span class="empty">—</span>':String(v)}
