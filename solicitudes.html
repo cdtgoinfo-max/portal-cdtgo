@@ -230,7 +230,7 @@
 </div>
 <script>
 // ── CONFIGURACION ─────────────────────────────────────────────
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyugLQkfJJIYNuE91o9EYD1FtTsX1QY-3wBg0H7Yd-e7xD1Wbwou9KOitIqlI9UTPe7eA/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwRg05oCtrzyI5bdsaBSlT6BRfb7y2KNpGo3U60xZ65vkDTq19FGMdhFG_GaRovDbIY8g/exec';
 
 // ── ESTADO GLOBAL ─────────────────────────────────────────────
 let currentLead = {};
@@ -362,10 +362,10 @@ function renderLead(d) {
   document.getElementById('f-giro-fic').textContent = '—';
   document.getElementById('f-util-bruta').textContent = '—';
 
-  // SEC 5: Seguimiento (solo lectura)
-  set('f-especialista', d.AS);
-  set('f-estado-lead', d.AT);
-  set('f-obs-lead', d.AU);
+  // SEC 5: Seguimiento (solo lectura) — AR=Especialista, AS=EstadoLead, AT=ObservacionLead
+  set('f-especialista', d.AR);
+  set('f-estado-lead', d.AS);
+  set('f-obs-lead', d.AT);
 
   // Reset mensaje análisis
   document.getElementById('save-msg-analisis').style.display = 'none';
