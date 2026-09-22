@@ -179,12 +179,7 @@
         <input class="f-edit-input" type="time" id="edit-hora-neg">
       </div>
 
-      <!-- Separador visual -->
-      <div class="field wide" style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
-        <div class="field-label" style="font-size:10px;color:var(--muted);margin-bottom:8px">▸ Parámetros de cálculo (solo página)</div>
-      </div>
-
-      <!-- AN / AO: inputs solo-página (no van a GS) -->
+      <!-- AN / AO: inputs de página (también se guardan en GS) -->
       <div class="field">
         <div class="field-label">Vr. Giro Final CDTgo</div>
         <input class="f-edit-input" type="number" id="edit-vr-giro" placeholder="0" min="0" step="1000" style="border-color:var(--muted)">
@@ -235,7 +230,7 @@
 </div>
 <script>
 // ── CONFIGURACION ─────────────────────────────────────────────
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbygE7mqNsim1KKmbqJCX1MoAOsIsHRit8FzyE1zH6w3sX7tY9pfF-P24W7S9XSCTPmQpw/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyugLQkfJJIYNuE91o9EYD1FtTsX1QY-3wBg0H7Yd-e7xD1Wbwou9KOitIqlI9UTPe7eA/exec';
 
 // ── ESTADO GLOBAL ─────────────────────────────────────────────
 let currentLead = {};
@@ -404,23 +399,27 @@ function recalcular() {
   currentLead._utilidadBruta = utilidadBruta.toFixed(0);
 }
 
-// ── GUARDAR ANALISIS (AH-AM + AN + AO → GS; AP/AQ solo página) ──
+// ── GUARDAR ANALISIS (AH-AO + AP + AQ → GS) ─────────────────
 function guardarAnalisis() {
   const id = document.getElementById('id-input').value.trim();
   if (!id) return;
 
+  // TasaFIC: el usuario ingresa número entero (ej: 18) → se guarda tal cual en GS
+  const tasaFicRaw = parseFloat(document.getElementById('edit-tasa-fic').value) || '';
+
   const params = {
-    action:    'update',
-    id:        id,
-    fechaCot:  document.getElementById('edit-fecha-cot').value,
-    fechaNeg:  document.getElementById('edit-fecha-neg').value,
-    ciudadNeg: document.getElementById('edit-ciudad-neg').value,
-    oficinaNeg:document.getElementById('edit-oficina-neg').value,
-    dirNeg:    document.getElementById('edit-dir-neg').value,
-    horaNeg:   document.getElementById('edit-hora-neg').value,
-    vrGiro:    document.getElementById('edit-vr-giro').value,    // AN
-    tasaFic:   document.getElementById('edit-tasa-fic').value    // AO
-    // AP/AQ son solo página — no se envían al GAS
+    action:       'update',
+    id:           id,
+    fechaCot:     document.getElementById('edit-fecha-cot').value,
+    fechaNeg:     document.getElementById('edit-fecha-neg').value,
+    ciudadNeg:    document.getElementById('edit-ciudad-neg').value,
+    oficinaNeg:   document.getElementById('edit-oficina-neg').value,
+    dirNeg:       document.getElementById('edit-dir-neg').value,
+    horaNeg:      document.getElementById('edit-hora-neg').value,
+    vrGiro:       document.getElementById('edit-vr-giro').value,   // AN col 40
+    tasaFic:      tasaFicRaw,                                      // AO col 41 — número plano (18 = 18%)
+    valorGiroFic: currentLead._valorGiroFic  || '',                // AP col 42
+    utilidadBruta:currentLead._utilidadBruta || ''                 // AQ col 43
   };
 
   enviarGAS(params, 'btn-save-analisis', 'save-msg-analisis');
