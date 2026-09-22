@@ -54,13 +54,18 @@
   .f-edit-select option{background:var(--surface2);color:var(--text);}
   .edit-label-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--accent);background:rgba(124,92,252,.12);border:1px solid rgba(124,92,252,.3);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:middle;text-transform:uppercase;}
 
-  /* SAVE ROW */
-  .save-row{display:none;grid-column:1/-1;margin-top:6px;display:none;gap:10px;align-items:center;justify-content:flex-end;}
-  .btn-save{background:linear-gradient(135deg,var(--accent),#5a3fd4);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 24px;cursor:pointer;transition:opacity .15s,transform .1s;display:flex;align-items:center;gap:8px;}
+  /* SAVE / RECALC ROWS */
+  .btn-save{background:linear-gradient(135deg,var(--accent),#5a3fd4);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 24px;cursor:pointer;transition:opacity .15s,transform .1s;display:inline-flex;align-items:center;gap:8px;}
   .btn-save:hover{opacity:.9;transform:translateY(-1px);}
   .btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none;}
-  .save-msg{font-family:var(--mono);font-size:11px;color:var(--ok);display:none;}
+  .btn-recalc{background:linear-gradient(135deg,#1a7fbd,var(--accent2));color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:13px;font-weight:600;padding:10px 24px;cursor:pointer;transition:opacity .15s,transform .1s;display:inline-flex;align-items:center;gap:8px;}
+  .btn-recalc:hover{opacity:.9;transform:translateY(-1px);}
+  .save-msg{font-family:var(--mono);font-size:11px;color:var(--ok);}
   .save-msg.err{color:#f47171;}
+  .action-row{grid-column:1/-1;display:flex;align-items:center;gap:12px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px;}
+
+  /* resultado recalc highlight */
+  .field-value.highlight{color:var(--warn);font-size:16px;font-weight:700;font-family:var(--mono);}
 
   @media(max-width:500px){.search-box{flex-direction:column;align-items:stretch}.search-label{display:none}#btn-consultar{width:100%;text-align:center}.section-body{grid-template-columns:1fr 1fr}}
   @media(max-width:360px){.section-body{grid-template-columns:1fr}}
@@ -75,12 +80,12 @@
   <div class="search-box">
     <span class="search-label">ID Solicitud</span>
     <input id="id-input" type="text" maxlength="8" placeholder="12345678" inputmode="numeric" autocomplete="off" spellcheck="false">
-    <button id="btn-consultar" onclick="consultar()">Consultar ›</button>
+    <button id="btn-consultar" onclick="consultar()">Consultar &#8250;</button>
   </div>
   <div id="estado"></div>
   <div id="ts-strip"><div class="ts-id" id="ts-id-val"></div><div class="ts-date" id="ts-date-val"></div></div>
 
-  <!-- SEC 1 -->
+  <!-- SEC 1: Datos del Lead -->
   <div class="section" id="sec1">
     <div class="section-header"><div class="section-num">1</div><div class="section-title">Datos del Lead</div></div>
     <div class="section-body">
@@ -90,60 +95,106 @@
     </div>
   </div>
 
-  <!-- SEC 2 -->
+  <!-- SEC 2: Condiciones del CDT -->
   <div class="section" id="sec2">
     <div class="section-header"><div class="section-num">2</div><div class="section-title">Condiciones del CDT</div></div>
     <div class="section-body">
       <div class="field"><div class="field-label">Emisor</div><div class="field-value" id="f-emisor"></div></div>
       <div class="field"><div class="field-label">Valor Nominal</div><div class="field-value money" id="f-nominal"></div></div>
-      <div class="field"><div class="field-label">Tipo Emisión</div><div class="field-value" id="f-tipo-emision"></div></div>
+      <div class="field"><div class="field-label">Tipo Emision</div><div class="field-value" id="f-tipo-emision"></div></div>
       <div class="field"><div class="field-label">Ciudad</div><div class="field-value" id="f-ciudad"></div></div>
       <div class="field"><div class="field-label">Oficina</div><div class="field-value" id="f-oficina"></div></div>
-      <div class="field"><div class="field-label">Fecha Emisión</div><div class="field-value" id="f-fem"></div></div>
+      <div class="field"><div class="field-label">Fecha Emision</div><div class="field-value" id="f-fem"></div></div>
       <div class="field"><div class="field-label">Fecha Vcmto.</div><div class="field-value" id="f-fvcm"></div></div>
-      <div class="field"><div class="field-label">Plazo (días)</div><div class="field-value" id="f-plazo"></div></div>
+      <div class="field"><div class="field-label">Plazo (dias)</div><div class="field-value" id="f-plazo"></div></div>
       <div class="field"><div class="field-label">Tipo Tasa</div><div class="field-value" id="f-tipo-tasa"></div></div>
       <div class="field"><div class="field-label">Tasa EA</div><div class="field-value rate" id="f-tasa-ea"></div></div>
       <div class="field"><div class="field-label">Spread</div><div class="field-value rate" id="f-spread"></div></div>
       <div class="field"><div class="field-label">Periodicidad</div><div class="field-value" id="f-periodo"></div></div>
-      <div class="field"><div class="field-label">Base Liquidación</div><div class="field-value" id="f-base"></div></div>
-      <div class="field"><div class="field-label">Tasa Nominal</div><div class="field-value rate" id="f-tnominal"></div></div>
-      <div class="field"><div class="field-label">Tasa Periódica</div><div class="field-value rate" id="f-tperiodica"></div></div>
+      <div class="field"><div class="field-label">Base Liquidacion</div><div class="field-value" id="f-base"></div></div>
+      <div class="field"><div class="field-label">Tasa Dto. Inicial</div><div class="field-value rate" id="f-tasa-dto"></div></div>
     </div>
   </div>
 
-  <!-- SEC 3 -->
+  <!-- SEC 3: Valoracion -->
   <div class="section" id="sec3">
-    <div class="section-header"><div class="section-num">3</div><div class="section-title">Valoración</div></div>
+    <div class="section-header"><div class="section-num">3</div><div class="section-title">Valoracion del CDT</div></div>
     <div class="section-body">
-      <div class="field"><div class="field-label">Tasa Dto. Inicial</div><div class="field-value rate" id="f-tasa-dto"></div></div>
-      <div class="field"><div class="field-label">Días Corridos</div><div class="field-value" id="f-dias-cor"></div></div>
-      <div class="field"><div class="field-label">Días p/ Vcmto.</div><div class="field-value" id="f-dias-vcm"></div></div>
+      <div class="field"><div class="field-label">Tasa Nominal</div><div class="field-value rate" id="f-tnominal"></div></div>
+      <div class="field"><div class="field-label">Tasa Periodica</div><div class="field-value rate" id="f-tperiodica"></div></div>
+      <div class="field"><div class="field-label">Dias Corridos</div><div class="field-value" id="f-dias-cor"></div></div>
+      <div class="field"><div class="field-label">Dias p/ Vcmto.</div><div class="field-value" id="f-dias-vcm"></div></div>
       <div class="field"><div class="field-label">Meses p/ Vcmto.</div><div class="field-value" id="f-meses-vcm"></div></div>
+      <div class="field"><div class="field-label">Int. por Periodo</div><div class="field-value money" id="f-int-periodo"></div></div>
       <div class="field"><div class="field-label">Intereses Totales</div><div class="field-value money" id="f-int-totales"></div></div>
+      <div class="field"><div class="field-label">RteFuente (4%)</div><div class="field-value money" id="f-rte"></div></div>
+      <div class="field"><div class="field-label">Intereses Netos</div><div class="field-value money" id="f-int-netos"></div></div>
       <div class="field"><div class="field-label">Intereses Pagados</div><div class="field-value money" id="f-int-pagados"></div></div>
       <div class="field"><div class="field-label">Valor Futuro</div><div class="field-value money" id="f-vf"></div></div>
+      <div class="field"><div class="field-label">Valor Futuro Neto</div><div class="field-value money" id="f-vfn"></div></div>
       <div class="field"><div class="field-label">Dto. Mensual Ini.</div><div class="field-value money" id="f-dto-men"></div></div>
       <div class="field"><div class="field-label">Dto. Total Ini.</div><div class="field-value money" id="f-dto-tot"></div></div>
       <div class="field"><div class="field-label">Dinero a Recibir</div><div class="field-value money" id="f-dinero"></div></div>
     </div>
   </div>
 
-  <!-- SEC 4 — Overhead con Tasa FIC editable -->
+  <!-- SEC 4: Analisis de la Operacion (AH-AO editables) -->
   <div class="section" id="sec4">
-    <div class="section-header"><div class="section-num">4</div><div class="section-title">Overhead CDTgo</div></div>
+    <div class="section-header"><div class="section-num">4</div><div class="section-title">Analisis de la Operacion</div></div>
     <div class="section-body">
-      <div class="field"><div class="field-label">Vr. Giro Final CDTgo</div><div class="field-value money" id="f-giro-final"></div></div>
       <div class="field">
-        <div class="field-label">Tasa FIC CDTgo <span class="edit-label-tag">editable</span></div>
+        <div class="field-label">Fecha Cotizacion <span class="edit-label-tag">editable</span></div>
+        <input class="f-edit-input" type="date" id="edit-fecha-cot">
+      </div>
+      <div class="field">
+        <div class="field-label">Fecha Negociacion <span class="edit-label-tag">editable</span></div>
+        <input class="f-edit-input" type="date" id="edit-fecha-neg">
+      </div>
+      <div class="field">
+        <div class="field-label">Ciudad Negociacion <span class="edit-label-tag">editable</span></div>
+        <input class="f-edit-input" type="text" id="edit-ciudad-neg" placeholder="Ej: Bogota">
+      </div>
+      <div class="field">
+        <div class="field-label">Oficina Negociacion <span class="edit-label-tag">editable</span></div>
+        <input class="f-edit-input" type="text" id="edit-oficina-neg" placeholder="Ej: Sede Principal">
+      </div>
+      <div class="field">
+        <div class="field-label">Direccion Neg. <span class="edit-label-tag">editable</span></div>
+        <input class="f-edit-input" type="text" id="edit-dir-neg" placeholder="Ej: Cra 7 # 32-15">
+      </div>
+      <div class="field">
+        <div class="field-label">Hora Neg. <span class="edit-label-tag">editable</span></div>
+        <input class="f-edit-input" type="time" id="edit-hora-neg">
+      </div>
+      <div class="field">
+        <div class="field-label">Vr. Giro Final CDTgo <span class="edit-label-tag">editable</span></div>
+        <input class="f-edit-input" type="number" id="edit-vr-giro" placeholder="0" min="0" step="1000">
+      </div>
+      <div class="field">
+        <div class="field-label">TASA FIC CDTgo % <span class="edit-label-tag">editable</span></div>
         <input class="f-edit-input" type="number" id="edit-tasa-fic" step="0.01" min="0" max="100" placeholder="18.00">
       </div>
-      <div class="field"><div class="field-label">Valor Giro FIC Est.</div><div class="field-value money" id="f-giro-fic"></div></div>
-      <div class="field"><div class="field-label">Utilidad Bruta Est.</div><div class="field-value money" id="f-util-bruta"></div></div>
+
+      <!-- Resultados estimados AP y AQ -->
+      <div class="field">
+        <div class="field-label">Valor Giro FIC Est. (AP)</div>
+        <div class="field-value highlight" id="f-giro-fic">—</div>
+      </div>
+      <div class="field">
+        <div class="field-label">Utilidad Bruta Est. (AQ)</div>
+        <div class="field-value highlight" id="f-util-bruta">—</div>
+      </div>
+
+      <!-- Acciones: Recalcular + Guardar -->
+      <div class="action-row">
+        <span class="save-msg" id="save-msg-analisis"></span>
+        <button class="btn-recalc" onclick="recalcular()">&#8635; Recalcular</button>
+        <button class="btn-save" id="btn-save-analisis" onclick="guardarAnalisis()">Guardar Analisis</button>
+      </div>
     </div>
   </div>
 
-  <!-- SEC 5 — Seguimiento con Especialista, EstadoLead y ObservacionLead editables -->
+  <!-- SEC 5: Seguimiento -->
   <div class="section" id="sec5">
     <div class="section-header"><div class="section-num">5</div><div class="section-title">Seguimiento</div></div>
     <div class="section-body">
@@ -167,7 +218,7 @@
         </select>
       </div>
       <div class="field">
-        <div class="field-label">Observación Lead <span class="edit-label-tag">editable</span></div>
+        <div class="field-label">Observacion Lead <span class="edit-label-tag">editable</span></div>
         <select class="f-edit-select" id="edit-obs-lead">
           <option value="">— Seleccionar —</option>
           <option value="CDT Comprado">CDT Comprado</option>
@@ -176,159 +227,278 @@
           <option value="Tercero">Tercero</option>
           <option value="Inseguridad Proceso">Inseguridad Proceso</option>
           <option value="Definiendo Fecha">Definiendo Fecha</option>
-          <option value="Indecisión">Indecisión</option>
+          <option value="Indecision">Indecision</option>
         </select>
       </div>
-      <div class="field"><div class="field-label">Email Automático</div><div class="field-value" id="f-email-auto"></div></div>
-      <div class="field"><div class="field-label">SARLAFT</div><div class="field-value" id="f-sarlaft"></div></div>
-      <div class="field"><div class="field-label">Utilidad Neta Est.</div><div class="field-value money" id="f-util-neta"></div></div>
-      <div class="field"><div class="field-label">Rt. Neta Per. Est.</div><div class="field-value rate" id="f-rt-neta"></div></div>
-
-      <!-- SAVE ROW -->
-      <div class="field wide" id="save-row" style="display:none;">
-        <div style="display:flex;align-items:center;gap:14px;justify-content:flex-end;flex-wrap:wrap;">
-          <span class="save-msg" id="save-msg"></span>
-          <button class="btn-save" id="btn-save" onclick="guardarCambios()">
-            💾 Guardar cambios
-          </button>
-        </div>
+      <div class="action-row">
+        <span class="save-msg" id="save-msg-seg"></span>
+        <button class="btn-save" id="btn-save-seg" onclick="guardarSeguimiento()">Guardar Seguimiento</button>
       </div>
     </div>
   </div>
 
 </div>
 <script>
-const GAS_URL='https://script.google.com/macros/s/AKfycbwazrOhJbbGn9C7bYmfoS4TBeNZF-nKQRCTbsJHGzKDTnjCJxZUD6nGMEeYvXsujyRD3Q/exec';
-let currentRowIndex = null;
+// ── CONFIGURACION ─────────────────────────────────────────────
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxhac2V1dNP3vgoMfUqhBEabBibfuuid0ogh0Zhr_XaH9p2WKQW6EKdUbw-ib1Bnh7UAQ/exec';
 
-function fmtCOP(v){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(/[^0-9.-]/g,''));if(isNaN(n))return v;return'$ '+n.toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0})}
-function fmtPct(v,raw){if(!v&&v!==0)return'—';const n=parseFloat(String(v).replace(',','.'));if(isNaN(n))return v+' %';const d=(!raw&&n>0&&n<1)?n*100:n;return d.toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:4})+' %'}
-function set(id,v){const el=document.getElementById(id);if(el)el.innerHTML=(!v&&v!==0)||String(v).trim()===''?'<span class="empty">—</span>':String(v)}
-function setCOP(id,v){set(id,fmtCOP(v))}
-function setPct(id,v,raw){set(id,fmtPct(v,raw))}
+// ── ESTADO GLOBAL ─────────────────────────────────────────────
+let currentLead = {};
 
-function consultar(){
-  const id=document.getElementById('id-input').value.trim();
-  if(!id||id.length<6){showError('Ingresa el ID de 8 dígitos.');return}
-  hideResults();showLoading('Consultando...');
-  const cbName='cb_'+Date.now();
-  const script=document.createElement('script');
-  const timer=setTimeout(()=>{cleanup();showError('Tiempo agotado. Verifica el GAS.')},10000);
-  function cleanup(){clearTimeout(timer);delete window[cbName];if(script.parentNode)script.parentNode.removeChild(script)}
-  window[cbName]=function(data){cleanup();clearEstado();if(data.error){showError(data.error);return}renderLead(data)};
-  script.onerror=function(){cleanup();showError('No se pudo conectar al GAS.')};
-  script.src=GAS_URL+'?id='+encodeURIComponent(id)+'&callback='+cbName;
-  document.head.appendChild(script);
+// ── HELPERS DISPLAY ───────────────────────────────────────────
+function fmtCOP(v) {
+  if (!v && v !== 0) return '—';
+  const n = parseFloat(String(v).replace(/[^0-9.-]/g, ''));
+  if (isNaN(n)) return String(v);
+  return '$ ' + n.toLocaleString('es-CO', {minimumFractionDigits:0, maximumFractionDigits:0});
 }
-
-function renderLead(d){
-  const parts=(d.A||'').split(' - ');
-  document.getElementById('ts-id-val').textContent=parts[1]||'';
-  document.getElementById('ts-date-val').textContent=parts[0]||'';
-  document.getElementById('ts-strip').style.display='flex';
-
-  // Guardar índice de fila para el update
-  currentRowIndex = d._row || null;
-
-  set('f-nombre',d.B);set('f-email',d.C);set('f-celular',d.D);
-  set('f-emisor',d.E);setCOP('f-nominal',d.F);set('f-tipo-emision',d.G);
-  set('f-ciudad',d.H);set('f-oficina',d.I);set('f-fem',fmtFecha(d.J));set('f-fvcm',fmtFecha(d.K));
-  set('f-plazo',d.L?d.L+' días':'');set('f-tipo-tasa',d.M);
-  setPct('f-tasa-ea',d.N);setPct('f-spread',d.O);set('f-periodo',d.P);
-  set('f-base',d.Q?d.Q+' días':'');setPct('f-tnominal',d.Z);setPct('f-tperiodica',d.AA);
-  setPct('f-tasa-dto',d.R);set('f-dias-cor',d.S?d.S+' días':'');
-  set('f-dias-vcm',d.T?d.T+' días':'');set('f-meses-vcm',d.U?d.U+' meses':'');
-  setCOP('f-int-totales',d.AC);setCOP('f-int-pagados',d.AF);setCOP('f-vf',d.AG);
-  setCOP('f-dto-men',d.W);setCOP('f-dto-tot',d.X);setCOP('f-dinero',d.Y);
-  setCOP('f-giro-final',d.AO);setCOP('f-giro-fic',d.AQ);setCOP('f-util-bruta',d.AR);
-  set('f-email-auto',d.AU);set('f-sarlaft',d.AV);
-  setCOP('f-util-neta',d.BF);setPct('f-rt-neta',d.BG,true);
-
-  // Cargar campos editables
-  const tasaFic = d.AP ? parseFloat(String(d.AP).replace(',','.')) : 18;
-  document.getElementById('edit-tasa-fic').value = isNaN(tasaFic) ? 18 : (tasaFic < 1 ? (tasaFic*100).toFixed(2) : tasaFic);
-
-  setSelectVal('edit-especialista', d.AS);
-  setSelectVal('edit-estado-lead', d.AT);
-  setSelectVal('edit-obs-lead', d.AU_obs || d.AU || '');
-
-  document.getElementById('save-row').style.display='block';
-  document.getElementById('save-msg').style.display='none';
-
-  ['sec1','sec2','sec3','sec4','sec5'].forEach(id=>document.getElementById(id).style.display='block');
+function fmtPct(v) {
+  if (!v && v !== 0) return '—';
+  const n = parseFloat(String(v).replace(',', '.'));
+  if (isNaN(n)) return String(v) + ' %';
+  return n.toLocaleString('es-CO', {minimumFractionDigits:2, maximumFractionDigits:4}) + ' %';
 }
-
+function set(id, v) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = (!v && v !== 0) || String(v).trim() === ''
+    ? '<span class="empty">—</span>' : String(v);
+}
+function setCOP(id, v) { set(id, fmtCOP(v)); }
+function setPct(id, v) { set(id, fmtPct(v)); }
+function fmtFecha(v) {
+  if (!v) return '—';
+  const s = String(v);
+  if (/^\d{2}\/\d{2}/.test(s)) return s;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[3] + '/' + m[2] + '/' + m[1];
+  return s;
+}
+// Convierte dd/mm/yy o dd/mm/yyyy → yyyy-mm-dd para input type=date
+function toInputDate(v) {
+  if (!v) return '';
+  const s = String(v).trim();
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{2,4})$/);
+  if (!m) return '';
+  const yr = m[3].length === 2 ? '20' + m[3] : m[3];
+  return yr + '-' + m[2] + '-' + m[1];
+}
 function setSelectVal(id, val) {
   const sel = document.getElementById(id);
   if (!sel) return;
-  const v = String(val||'').trim();
-  for (let i=0; i<sel.options.length; i++) {
+  const v = String(val || '').trim();
+  for (let i = 0; i < sel.options.length; i++) {
     if (sel.options[i].value === v) { sel.selectedIndex = i; return; }
   }
   sel.selectedIndex = 0;
 }
 
-function guardarCambios(){
+// ── CONSULTAR ─────────────────────────────────────────────────
+function consultar() {
+  const id = document.getElementById('id-input').value.trim();
+  if (!id || id.length < 6) { showError('Ingresa el ID de 8 digitos.'); return; }
+  hideResults(); showLoading('Consultando...');
+  const cbName = 'cb_' + Date.now();
+  const script = document.createElement('script');
+  const timer = setTimeout(() => { cleanup(); showError('Tiempo agotado. Verifica el GAS.'); }, 10000);
+  function cleanup() { clearTimeout(timer); delete window[cbName]; if (script.parentNode) script.parentNode.removeChild(script); }
+  window[cbName] = function(data) {
+    cleanup(); clearEstado();
+    if (data.error) { showError(data.error); return; }
+    renderLead(data);
+  };
+  script.onerror = function() { cleanup(); showError('No se pudo conectar al GAS.'); };
+  script.src = GAS_URL + '?id=' + encodeURIComponent(id) + '&callback=' + cbName;
+  document.head.appendChild(script);
+}
+
+// ── RENDER LEAD ───────────────────────────────────────────────
+// Mapeo exacto Sheet → columna letra
+// A=Timestamp B=Nombre C=Email D=Celular E=Emisor F=Valor_Nominal G=Tipo_Emision
+// H=Ciudad I=Oficina J=Fecha_Emision K=Fecha_Vencimiento L=Plazo_Dias M=Tipo_Tasa
+// N=Tasa_EA O=Spread P=Periodicidad_Pago Q=Base_de_liq R=TasaDcto S=Dias_Corridos
+// T=Dias_Vcmto U=Meses_Vcmto V=Dcto_Mensual W=Dcto_Total X=Dinero_A_Recibir
+// Y=Tasa_Nom Z=Tasa_Per AA=Int_X_Per AB=Int_Totales AC=RteFte_4 AD=Int_Netos
+// AE=Int_Pagados AF=Valor_Futuro AG=Valor_Futuro_Neto
+// AH=Fecha_Cotizacion AI=Fecha_Negociacion AJ=Ciudad_Negociacion AK=Oficina_Negociacion
+// AL=Direccion_Neg AM=Hora_Neg AN=Vr_Giro_Final_CDTgo AO=TASA_FIC_CDTgo
+// AP=VALOR_GIRO_FIC_est AQ=UTILIDAD_BRUTA_est
+// AS=Especialista AT=EstadoLead AU=ObsLead
+
+function renderLead(d) {
+  currentLead = d;
+
+  // Timestamp strip
+  const parts = (d.A || '').split(' - ');
+  document.getElementById('ts-id-val').textContent = parts[1] || '';
+  document.getElementById('ts-date-val').textContent = parts[0] || '';
+  document.getElementById('ts-strip').style.display = 'flex';
+
+  // SEC 1: Datos del lead
+  set('f-nombre', d.B); set('f-email', d.C); set('f-celular', d.D);
+
+  // SEC 2: Condiciones CDT
+  set('f-emisor', d.E); setCOP('f-nominal', d.F); set('f-tipo-emision', d.G);
+  set('f-ciudad', d.H); set('f-oficina', d.I);
+  set('f-fem', fmtFecha(d.J)); set('f-fvcm', fmtFecha(d.K));
+  set('f-plazo', d.L ? d.L + ' dias' : '');
+  set('f-tipo-tasa', d.M); setPct('f-tasa-ea', d.N); setPct('f-spread', d.O);
+  set('f-periodo', d.P); set('f-base', d.Q ? d.Q + ' dias' : '');
+  setPct('f-tasa-dto', d.R);
+
+  // SEC 3: Valoracion
+  setPct('f-tnominal', d.Y); setPct('f-tperiodica', d.Z);
+  set('f-dias-cor', d.S ? d.S + ' dias' : '');
+  set('f-dias-vcm', d.T ? d.T + ' dias' : '');
+  set('f-meses-vcm', d.U ? d.U + ' meses' : '');
+  setCOP('f-int-periodo', d.AA); setCOP('f-int-totales', d.AB);
+  setCOP('f-rte', d.AC); setCOP('f-int-netos', d.AD); setCOP('f-int-pagados', d.AE);
+  setCOP('f-vf', d.AF); setCOP('f-vfn', d.AG);
+  setCOP('f-dto-men', d.V); setCOP('f-dto-tot', d.W); setCOP('f-dinero', d.X);
+
+  // SEC 4: Analisis de la Operacion — cargar campos editables AH-AO
+  document.getElementById('edit-fecha-cot').value = toInputDate(d.AH) || '';
+  document.getElementById('edit-fecha-neg').value = toInputDate(d.AI) || '';
+  document.getElementById('edit-ciudad-neg').value = d.AJ || '';
+  document.getElementById('edit-oficina-neg').value = d.AK || '';
+  document.getElementById('edit-dir-neg').value = d.AL || '';
+  document.getElementById('edit-hora-neg').value = d.AM || '';
+  document.getElementById('edit-vr-giro').value = d.AN ? parseFloat(String(d.AN).replace(/[^0-9.]/g,'')) : '';
+  const tasaFic = d.AO ? parseFloat(String(d.AO).replace(',', '.')) : 18;
+  document.getElementById('edit-tasa-fic').value = isNaN(tasaFic) ? 18 : (tasaFic < 1 ? (tasaFic * 100).toFixed(2) : tasaFic.toFixed(2));
+
+  // Mostrar estimados AP y AQ si ya existen en el Sheet
+  setCOP('f-giro-fic', d.AP);
+  setCOP('f-util-bruta', d.AQ);
+
+  // SEC 5: Seguimiento
+  setSelectVal('edit-especialista', d.AS);
+  setSelectVal('edit-estado-lead', d.AT);
+  setSelectVal('edit-obs-lead', d.AU);
+
+  // Reset mensajes
+  document.getElementById('save-msg-analisis').style.display = 'none';
+  document.getElementById('save-msg-seg').style.display = 'none';
+
+  ['sec1','sec2','sec3','sec4','sec5'].forEach(id => document.getElementById(id).style.display = 'block');
+}
+
+// ── RECALCULAR AP y AQ (solo en pantalla, no guarda) ─────────
+function recalcular() {
+  const vrGiro = parseFloat(document.getElementById('edit-vr-giro').value) || 0;
+  const tasaFic = parseFloat(document.getElementById('edit-tasa-fic').value) || 18;
+  const mesesVcmto = parseFloat(String(currentLead.U || '0').replace(',', '.')) || 0;
+
+  // VALOR_GIRO_FIC_est = Vr_Giro_Final * (1 + tasaFic%/12) ^ mesesVcmto
+  // Fórmula de valoracion FIC a tasa mensual
+  const tasaMensual = tasaFic / 100;
+  const valorGiroFic = vrGiro * Math.pow(1 + tasaMensual, mesesVcmto);
+
+  // UTILIDAD_BRUTA_est = VALOR_GIRO_FIC_est - Dinero_A_Recibir (precio de compra)
+  const dineroRecibir = parseFloat(String(currentLead.X || '0').replace(/[^0-9.]/g, '')) || 0;
+  const utilidadBruta = valorGiroFic - dineroRecibir;
+
+  document.getElementById('f-giro-fic').textContent = fmtCOP(valorGiroFic.toFixed(0));
+  document.getElementById('f-util-bruta').textContent = fmtCOP(utilidadBruta.toFixed(0));
+
+  // Guardar en currentLead para que guardarAnalisis pueda enviarlos
+  currentLead._valorGiroFic = valorGiroFic.toFixed(0);
+  currentLead._utilidadBruta = utilidadBruta.toFixed(0);
+}
+
+// ── GUARDAR ANALISIS (AH-AO + AP + AQ) ───────────────────────
+function guardarAnalisis() {
   const id = document.getElementById('id-input').value.trim();
   if (!id) return;
 
-  const tasaFic = parseFloat(document.getElementById('edit-tasa-fic').value);
-  const especialista = document.getElementById('edit-especialista').value;
-  const estadoLead = document.getElementById('edit-estado-lead').value;
-  const obsLead = document.getElementById('edit-obs-lead').value;
+  const params = {
+    action: 'update',
+    id: id,
+    fechaCot:    document.getElementById('edit-fecha-cot').value,
+    fechaNeg:    document.getElementById('edit-fecha-neg').value,
+    ciudadNeg:   document.getElementById('edit-ciudad-neg').value,
+    oficinaNeg:  document.getElementById('edit-oficina-neg').value,
+    dirNeg:      document.getElementById('edit-dir-neg').value,
+    horaNeg:     document.getElementById('edit-hora-neg').value,
+    vrGiro:      document.getElementById('edit-vr-giro').value,
+    tasaFic:     document.getElementById('edit-tasa-fic').value,
+    valorGiroFic: currentLead._valorGiroFic || '',
+    utilidadBruta: currentLead._utilidadBruta || ''
+  };
 
-  const btn = document.getElementById('btn-save');
-  const msg = document.getElementById('save-msg');
+  enviarGAS(params, 'btn-save-analisis', 'save-msg-analisis');
+}
+
+// ── GUARDAR SEGUIMIENTO (AS, AT, AU) ──────────────────────────
+function guardarSeguimiento() {
+  const id = document.getElementById('id-input').value.trim();
+  if (!id) return;
+
+  const params = {
+    action: 'update',
+    id: id,
+    especialista: document.getElementById('edit-especialista').value,
+    estadoLead:   document.getElementById('edit-estado-lead').value,
+    obsLead:      document.getElementById('edit-obs-lead').value
+  };
+
+  enviarGAS(params, 'btn-save-seg', 'save-msg-seg');
+}
+
+// ── HELPER JSONP SEND ─────────────────────────────────────────
+function enviarGAS(params, btnId, msgId) {
+  const btn = document.getElementById(btnId);
+  const msg = document.getElementById(msgId);
   btn.disabled = true;
-  btn.innerHTML = '⏳ Guardando…';
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '&#8987; Guardando...';
   msg.style.display = 'none';
 
   const cbName = 'cbSave_' + Date.now();
   const script = document.createElement('script');
-  const timer = setTimeout(()=>{cleanup();showSaveMsg('Tiempo agotado — intenta de nuevo','err');},10000);
-  function cleanup(){clearTimeout(timer);delete window[cbName];if(script.parentNode)script.parentNode.removeChild(script);btn.disabled=false;btn.innerHTML='💾 Guardar cambios';}
-  window[cbName] = function(res){
+  const timer = setTimeout(() => { cleanup(); showSaveMsg(msgId, 'Tiempo agotado', 'err'); }, 10000);
+
+  function cleanup() {
+    clearTimeout(timer);
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
+  }
+
+  window[cbName] = function(res) {
     cleanup();
-    if(res.ok){showSaveMsg('✓ Cambios guardados','ok');}
-    else{showSaveMsg('Error: '+(res.error||'intenta de nuevo'),'err');}
+    if (res.ok) { showSaveMsg(msgId, 'Cambios guardados', 'ok'); }
+    else { showSaveMsg(msgId, 'Error: ' + (res.error || 'intenta de nuevo'), 'err'); }
   };
-  script.onerror = function(){cleanup();showSaveMsg('Error de conexión','err');};
-  script.src = GAS_URL
-    + '?action=update'
-    + '&id=' + encodeURIComponent(id)
-    + '&tasaFic=' + encodeURIComponent(isNaN(tasaFic)?18:tasaFic)
-    + '&especialista=' + encodeURIComponent(especialista)
-    + '&estadoLead=' + encodeURIComponent(estadoLead)
-    + '&obsLead=' + encodeURIComponent(obsLead)
-    + '&callback=' + cbName;
+  script.onerror = function() { cleanup(); showSaveMsg(msgId, 'Error de conexion', 'err'); };
+
+  let qs = '';
+  for (const k in params) {
+    qs += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k] || '');
+  }
+  script.src = GAS_URL + '?' + qs.slice(1) + '&callback=' + cbName;
   document.head.appendChild(script);
 }
 
-function showSaveMsg(txt, type){
-  const msg = document.getElementById('save-msg');
+function showSaveMsg(msgId, txt, type) {
+  const msg = document.getElementById(msgId);
   msg.textContent = txt;
-  msg.className = 'save-msg' + (type==='err'?' err':'');
+  msg.className = 'save-msg' + (type === 'err' ? ' err' : '');
   msg.style.display = 'inline';
 }
 
-function hideResults(){
-  document.getElementById('ts-strip').style.display='none';
-  document.getElementById('save-row').style.display='none';
-  ['sec1','sec2','sec3','sec4','sec5'].forEach(id=>document.getElementById(id).style.display='none');
-  currentRowIndex=null;
+// ── UI helpers ────────────────────────────────────────────────
+function hideResults() {
+  document.getElementById('ts-strip').style.display = 'none';
+  ['sec1','sec2','sec3','sec4','sec5'].forEach(id => document.getElementById(id).style.display = 'none');
+  currentLead = {};
 }
-function showLoading(msg){const el=document.getElementById('estado');el.className='loading';el.textContent=msg;el.style.display='block'}
-function showError(msg){const el=document.getElementById('estado');el.className='error';el.textContent='✕  '+msg;el.style.display='block'}
-function clearEstado(){const el=document.getElementById('estado');el.style.display='none';el.className=''}
-function fmtFecha(v){
-  if(!v)return'—';
-  const s=String(v);
-  if(/^\d{2}\/\d{2}/.test(s))return s;
-  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if(m)return m[3]+'/'+m[2]+'/'+m[1];
-  return s;
-}
-document.getElementById('id-input').addEventListener('keydown',e=>{if(e.key==='Enter')consultar()});
+function showLoading(msg) { const el = document.getElementById('estado'); el.className = 'loading'; el.textContent = msg; el.style.display = 'block'; }
+function showError(msg)   { const el = document.getElementById('estado'); el.className = 'error';   el.textContent = '&#10007;  ' + msg; el.style.display = 'block'; }
+function clearEstado()    { const el = document.getElementById('estado'); el.style.display = 'none'; el.className = ''; }
+
+document.getElementById('id-input').addEventListener('keydown', e => { if (e.key === 'Enter') consultar(); });
 </script>
 </body>
 </html>
