@@ -213,45 +213,21 @@
     </div>
   </div>
 
-  <!-- SEC 5: Seguimiento -->
+  <!-- SEC 5: Seguimiento (solo lectura desde GS) -->
   <div class="section" id="sec5">
     <div class="section-header"><div class="section-num">5</div><div class="section-title">Seguimiento</div></div>
     <div class="section-body">
       <div class="field">
-        <div class="field-label">Especialista <span class="edit-label-tag">editable</span></div>
-        <select class="f-edit-select" id="edit-especialista">
-          <option value="">— Seleccionar —</option>
-          <option value="MC">MC</option>
-          <option value="JU">JU</option>
-        </select>
+        <div class="field-label">Especialista</div>
+        <div class="field-value" id="f-especialista"></div>
       </div>
       <div class="field">
-        <div class="field-label">Estado Lead <span class="edit-label-tag">editable</span></div>
-        <select class="f-edit-select" id="edit-estado-lead">
-          <option value="">— Seleccionar —</option>
-          <option value="Acepta">Acepta</option>
-          <option value="Contactado">Contactado</option>
-          <option value="Analizando">Analizando</option>
-          <option value="Declina">Declina</option>
-          <option value="No Responde">No Responde</option>
-        </select>
+        <div class="field-label">Estado Lead</div>
+        <div class="field-value" id="f-estado-lead"></div>
       </div>
       <div class="field">
-        <div class="field-label">Observacion Lead <span class="edit-label-tag">editable</span></div>
-        <select class="f-edit-select" id="edit-obs-lead">
-          <option value="">— Seleccionar —</option>
-          <option value="CDT Comprado">CDT Comprado</option>
-          <option value="Esperar al Vcmto">Esperar al Vcmto</option>
-          <option value="Competencia">Competencia</option>
-          <option value="Tercero">Tercero</option>
-          <option value="Inseguridad Proceso">Inseguridad Proceso</option>
-          <option value="Definiendo Fecha">Definiendo Fecha</option>
-          <option value="Indecision">Indecision</option>
-        </select>
-      </div>
-      <div class="action-row">
-        <span class="save-msg" id="save-msg-seg"></span>
-        <button class="btn-save" id="btn-save-seg" onclick="guardarSeguimiento()">Guardar Seguimiento</button>
+        <div class="field-label">Observación Lead</div>
+        <div class="field-value" id="f-obs-lead"></div>
       </div>
     </div>
   </div>
@@ -259,7 +235,7 @@
 </div>
 <script>
 // ── CONFIGURACION ─────────────────────────────────────────────
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbyqnPOFxc74PsbIMr2ezPxxla9rZHLfp9FS6aEvpAkbh4xohqwX7AqiUCUSTaTOiCokeA/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbygE7mqNsim1KKmbqJCX1MoAOsIsHRit8FzyE1zH6w3sX7tY9pfF-P24W7S9XSCTPmQpw/exec';
 
 // ── ESTADO GLOBAL ─────────────────────────────────────────────
 let currentLead = {};
@@ -391,14 +367,13 @@ function renderLead(d) {
   document.getElementById('f-giro-fic').textContent = '—';
   document.getElementById('f-util-bruta').textContent = '—';
 
-  // SEC 5: Seguimiento
-  setSelectVal('edit-especialista', d.AS);
-  setSelectVal('edit-estado-lead', d.AT);
-  setSelectVal('edit-obs-lead', d.AU);
+  // SEC 5: Seguimiento (solo lectura)
+  set('f-especialista', d.AS);
+  set('f-estado-lead', d.AT);
+  set('f-obs-lead', d.AU);
 
-  // Reset mensajes
+  // Reset mensaje análisis
   document.getElementById('save-msg-analisis').style.display = 'none';
-  document.getElementById('save-msg-seg').style.display = 'none';
 
   ['sec1','sec2','sec3','sec4','sec5'].forEach(id => document.getElementById(id).style.display = 'block');
 }
@@ -429,7 +404,7 @@ function recalcular() {
   currentLead._utilidadBruta = utilidadBruta.toFixed(0);
 }
 
-// ── GUARDAR ANALISIS (AH-AM solamente → GS) ──────────────────
+// ── GUARDAR ANALISIS (AH-AM + AN + AO → GS; AP/AQ solo página) ──
 function guardarAnalisis() {
   const id = document.getElementById('id-input').value.trim();
   if (!id) return;
@@ -442,27 +417,13 @@ function guardarAnalisis() {
     ciudadNeg: document.getElementById('edit-ciudad-neg').value,
     oficinaNeg:document.getElementById('edit-oficina-neg').value,
     dirNeg:    document.getElementById('edit-dir-neg').value,
-    horaNeg:   document.getElementById('edit-hora-neg').value
-    // AN/AO/AP/AQ son solo página — no se envían al GAS
+    horaNeg:   document.getElementById('edit-hora-neg').value,
+    vrGiro:    document.getElementById('edit-vr-giro').value,    // AN
+    tasaFic:   document.getElementById('edit-tasa-fic').value    // AO
+    // AP/AQ son solo página — no se envían al GAS
   };
 
   enviarGAS(params, 'btn-save-analisis', 'save-msg-analisis');
-}
-
-// ── GUARDAR SEGUIMIENTO (AS, AT, AU) ──────────────────────────
-function guardarSeguimiento() {
-  const id = document.getElementById('id-input').value.trim();
-  if (!id) return;
-
-  const params = {
-    action: 'update',
-    id: id,
-    especialista: document.getElementById('edit-especialista').value,
-    estadoLead:   document.getElementById('edit-estado-lead').value,
-    obsLead:      document.getElementById('edit-obs-lead').value
-  };
-
-  enviarGAS(params, 'btn-save-seg', 'save-msg-seg');
 }
 
 // ── HELPER JSONP SEND ─────────────────────────────────────────
