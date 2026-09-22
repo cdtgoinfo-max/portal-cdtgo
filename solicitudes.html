@@ -240,7 +240,7 @@
 </div>
 <script>
 // ── CONFIGURACION ─────────────────────────────────────────────
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxhac2V1dNP3vgoMfUqhBEabBibfuuid0ogh0Zhr_XaH9p2WKQW6EKdUbw-ib1Bnh7UAQ/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzTHCciv2GorMzlIPUP0R-w6jOTXMpH41-yiX3Tu1eQ-7XieESm1LMiWdV227_OHlu7tA/exec';
 
 // ── ESTADO GLOBAL ─────────────────────────────────────────────
 let currentLead = {};
@@ -385,18 +385,21 @@ function renderLead(d) {
 
 // ── RECALCULAR AP y AQ (solo en pantalla, no guarda) ─────────
 function recalcular() {
-  const vrGiro = parseFloat(document.getElementById('edit-vr-giro').value) || 0;
+  const vrGiro  = parseFloat(document.getElementById('edit-vr-giro').value) || 0;
   const tasaFic = parseFloat(document.getElementById('edit-tasa-fic').value) || 18;
-  const mesesVcmto = parseFloat(String(currentLead.U || '0').replace(',', '.')) || 0;
 
-  // VALOR_GIRO_FIC_est = Vr_Giro_Final * (1 + tasaFic%/12) ^ mesesVcmto
-  // Fórmula de valoracion FIC a tasa mensual
-  const tasaMensual = tasaFic / 100;
-  const valorGiroFic = vrGiro * Math.pow(1 + tasaMensual, mesesVcmto);
+  // Datos del lead: AF=Valor_Futuro, T=Dias_Vcmto, Q=Base_liq, AN=Vr_Giro_Final
+  const valorFuturo = parseFloat(String(currentLead.AF || '0').replace(/[^0-9.]/g, '')) || 0;
+  const diasVcmto   = parseFloat(String(currentLead.T  || '0').replace(/[^0-9.]/g, '')) || 0;
+  const baseLiq     = parseFloat(String(currentLead.Q  || '360').replace(/[^0-9.]/g, '')) || 360;
 
-  // UTILIDAD_BRUTA_est = VALOR_GIRO_FIC_est - Dinero_A_Recibir (precio de compra)
-  const dineroRecibir = parseFloat(String(currentLead.X || '0').replace(/[^0-9.]/g, '')) || 0;
-  const utilidadBruta = valorGiroFic - dineroRecibir;
+  // AP = AF / (1 + AO)^(T/Q)   donde AO = tasaFic / 100 (tasa anual decimal)
+  const tasaFicDec  = tasaFic / 100;
+  const exponente   = diasVcmto / baseLiq;
+  const valorGiroFic = valorFuturo / Math.pow(1 + tasaFicDec, exponente);
+
+  // AQ = AP - AN  (Utilidad = Valor descontado - Giro real pagado)
+  const utilidadBruta = valorGiroFic - vrGiro;
 
   document.getElementById('f-giro-fic').textContent = fmtCOP(valorGiroFic.toFixed(0));
   document.getElementById('f-util-bruta').textContent = fmtCOP(utilidadBruta.toFixed(0));
