@@ -36,7 +36,10 @@
   .ts-id{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--accent2);letter-spacing:2px}
   .ts-date{font-family:var(--mono);font-size:13px;color:var(--muted)}
   .section{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden;display:none}
-  .section-header{background:var(--surface2);padding:11px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+  .section-header{background:var(--surface2);padding:11px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .section-header-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .dinero-badge{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--ok);letter-spacing:-0.5px;white-space:nowrap}
+  .dinero-badge-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-right:4px}
   .section-num{width:22px;height:22px;background:var(--accent);border-radius:50%;font-size:11px;font-weight:700;color:#fff;display:grid;place-items:center;flex-shrink:0}
   .section-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)}
   .section-body{padding:16px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 20px}
@@ -116,9 +119,16 @@
     </div>
   </div>
 
-  <!-- SEC 3: Valoracion -->
+  <!-- SEC 3: Valor de Giro CDTgo -->
   <div class="section" id="sec3">
-    <div class="section-header"><div class="section-num">3</div><div class="section-title">Valoracion del CDT</div></div>
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">Valor de Giro CDTgo</div>
+      <div class="section-header-right">
+        <span class="dinero-badge-label">Dinero a Recibir</span>
+        <span class="dinero-badge" id="f-dinero-badge">—</span>
+      </div>
+    </div>
     <div class="section-body">
       <div class="field"><div class="field-label">Tasa Nominal</div><div class="field-value rate" id="f-tnominal"></div></div>
       <div class="field"><div class="field-label">Tasa Periodica</div><div class="field-value rate" id="f-tperiodica"></div></div>
@@ -138,58 +148,67 @@
     </div>
   </div>
 
-  <!-- SEC 4: Analisis de la Operacion (AH-AO editables) -->
+  <!-- SEC 4: Analisis de la Operacion (AH-AM editables; AN/AO/AP/AQ solo página) -->
   <div class="section" id="sec4">
-    <div class="section-header"><div class="section-num">4</div><div class="section-title">Analisis de la Operacion</div></div>
+    <div class="section-header"><div class="section-num">4</div><div class="section-title">Análisis de la Operación</div></div>
     <div class="section-body">
+
+      <!-- AH-AM: editables → se guardan en GS -->
       <div class="field">
-        <div class="field-label">Fecha Cotizacion <span class="edit-label-tag">editable</span></div>
+        <div class="field-label">Fecha Cotización <span class="edit-label-tag">editable</span></div>
         <input class="f-edit-input" type="date" id="edit-fecha-cot">
       </div>
       <div class="field">
-        <div class="field-label">Fecha Negociacion <span class="edit-label-tag">editable</span></div>
+        <div class="field-label">Fecha Negociación <span class="edit-label-tag">editable</span></div>
         <input class="f-edit-input" type="date" id="edit-fecha-neg">
       </div>
       <div class="field">
-        <div class="field-label">Ciudad Negociacion <span class="edit-label-tag">editable</span></div>
-        <input class="f-edit-input" type="text" id="edit-ciudad-neg" placeholder="Ej: Bogota">
+        <div class="field-label">Ciudad Negociación <span class="edit-label-tag">editable</span></div>
+        <input class="f-edit-input" type="text" id="edit-ciudad-neg" placeholder="Ej: Bogotá">
       </div>
       <div class="field">
-        <div class="field-label">Oficina Negociacion <span class="edit-label-tag">editable</span></div>
+        <div class="field-label">Oficina Negociación <span class="edit-label-tag">editable</span></div>
         <input class="f-edit-input" type="text" id="edit-oficina-neg" placeholder="Ej: Sede Principal">
       </div>
       <div class="field">
-        <div class="field-label">Direccion Neg. <span class="edit-label-tag">editable</span></div>
+        <div class="field-label">Dirección Neg. <span class="edit-label-tag">editable</span></div>
         <input class="f-edit-input" type="text" id="edit-dir-neg" placeholder="Ej: Cra 7 # 32-15">
       </div>
       <div class="field">
         <div class="field-label">Hora Neg. <span class="edit-label-tag">editable</span></div>
         <input class="f-edit-input" type="time" id="edit-hora-neg">
       </div>
-      <div class="field">
-        <div class="field-label">Vr. Giro Final CDTgo <span class="edit-label-tag">editable</span></div>
-        <input class="f-edit-input" type="number" id="edit-vr-giro" placeholder="0" min="0" step="1000">
-      </div>
-      <div class="field">
-        <div class="field-label">TASA FIC CDTgo % <span class="edit-label-tag">editable</span></div>
-        <input class="f-edit-input" type="number" id="edit-tasa-fic" step="0.01" min="0" max="100" placeholder="18.00">
+
+      <!-- Separador visual -->
+      <div class="field wide" style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
+        <div class="field-label" style="font-size:10px;color:var(--muted);margin-bottom:8px">▸ Parámetros de cálculo (solo página)</div>
       </div>
 
-      <!-- Resultados estimados AP y AQ -->
+      <!-- AN / AO: inputs solo-página (no van a GS) -->
       <div class="field">
-        <div class="field-label">Valor Giro FIC Est. (AP)</div>
+        <div class="field-label">Vr. Giro Final CDTgo</div>
+        <input class="f-edit-input" type="number" id="edit-vr-giro" placeholder="0" min="0" step="1000" style="border-color:var(--muted)">
+      </div>
+      <div class="field">
+        <div class="field-label">TASA FIC CDTgo %</div>
+        <input class="f-edit-input" type="number" id="edit-tasa-fic" step="0.01" min="0" max="100" placeholder="18.00" style="border-color:var(--muted)">
+      </div>
+
+      <!-- AP / AQ: resultados calculados -->
+      <div class="field">
+        <div class="field-label">Valor Giro FIC Est.</div>
         <div class="field-value highlight" id="f-giro-fic">—</div>
       </div>
       <div class="field">
-        <div class="field-label">Utilidad Bruta Est. (AQ)</div>
+        <div class="field-label">Utilidad Bruta Est.</div>
         <div class="field-value highlight" id="f-util-bruta">—</div>
       </div>
 
-      <!-- Acciones: Recalcular + Guardar -->
+      <!-- Acciones: Procesar + Guardar en GS -->
       <div class="action-row">
         <span class="save-msg" id="save-msg-analisis"></span>
-        <button class="btn-recalc" onclick="recalcular()">&#8635; Recalcular</button>
-        <button class="btn-save" id="btn-save-analisis" onclick="guardarAnalisis()">Guardar Analisis</button>
+        <button class="btn-recalc" onclick="recalcular()">&#9654; Procesar</button>
+        <button class="btn-save" id="btn-save-analisis" onclick="guardarAnalisis()">Guardar en GS</button>
       </div>
     </div>
   </div>
@@ -240,7 +259,7 @@
 </div>
 <script>
 // ── CONFIGURACION ─────────────────────────────────────────────
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzTHCciv2GorMzlIPUP0R-w6jOTXMpH41-yiX3Tu1eQ-7XieESm1LMiWdV227_OHlu7tA/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyqnPOFxc74PsbIMr2ezPxxla9rZHLfp9FS6aEvpAkbh4xohqwX7AqiUCUSTaTOiCokeA/exec';
 
 // ── ESTADO GLOBAL ─────────────────────────────────────────────
 let currentLead = {};
@@ -355,21 +374,22 @@ function renderLead(d) {
   setCOP('f-rte', d.AC); setCOP('f-int-netos', d.AD); setCOP('f-int-pagados', d.AE);
   setCOP('f-vf', d.AF); setCOP('f-vfn', d.AG);
   setCOP('f-dto-men', d.V); setCOP('f-dto-tot', d.W); setCOP('f-dinero', d.X);
+  // Dinero a Recibir también en el badge del header de SEC 3
+  document.getElementById('f-dinero-badge').textContent = fmtCOP(d.X);
 
-  // SEC 4: Analisis de la Operacion — cargar campos editables AH-AO
+  // SEC 4: Analisis — cargar campos editables AH-AM únicamente
   document.getElementById('edit-fecha-cot').value = toInputDate(d.AH) || '';
   document.getElementById('edit-fecha-neg').value = toInputDate(d.AI) || '';
   document.getElementById('edit-ciudad-neg').value = d.AJ || '';
   document.getElementById('edit-oficina-neg').value = d.AK || '';
   document.getElementById('edit-dir-neg').value = d.AL || '';
   document.getElementById('edit-hora-neg').value = d.AM || '';
-  document.getElementById('edit-vr-giro').value = d.AN ? parseFloat(String(d.AN).replace(/[^0-9.]/g,'')) : '';
-  const tasaFic = d.AO ? parseFloat(String(d.AO).replace(',', '.')) : 18;
-  document.getElementById('edit-tasa-fic').value = isNaN(tasaFic) ? 18 : (tasaFic < 1 ? (tasaFic * 100).toFixed(2) : tasaFic.toFixed(2));
-
-  // Mostrar estimados AP y AQ si ya existen en el Sheet
-  setCOP('f-giro-fic', d.AP);
-  setCOP('f-util-bruta', d.AQ);
+  // AN y AO son solo página — NO se cargan desde el Sheet
+  document.getElementById('edit-vr-giro').value = '';
+  document.getElementById('edit-tasa-fic').value = '';
+  // AP y AQ son calculados — se resetean
+  document.getElementById('f-giro-fic').textContent = '—';
+  document.getElementById('f-util-bruta').textContent = '—';
 
   // SEC 5: Seguimiento
   setSelectVal('edit-especialista', d.AS);
@@ -409,24 +429,21 @@ function recalcular() {
   currentLead._utilidadBruta = utilidadBruta.toFixed(0);
 }
 
-// ── GUARDAR ANALISIS (AH-AO + AP + AQ) ───────────────────────
+// ── GUARDAR ANALISIS (AH-AM solamente → GS) ──────────────────
 function guardarAnalisis() {
   const id = document.getElementById('id-input').value.trim();
   if (!id) return;
 
   const params = {
-    action: 'update',
-    id: id,
-    fechaCot:    document.getElementById('edit-fecha-cot').value,
-    fechaNeg:    document.getElementById('edit-fecha-neg').value,
-    ciudadNeg:   document.getElementById('edit-ciudad-neg').value,
-    oficinaNeg:  document.getElementById('edit-oficina-neg').value,
-    dirNeg:      document.getElementById('edit-dir-neg').value,
-    horaNeg:     document.getElementById('edit-hora-neg').value,
-    vrGiro:      document.getElementById('edit-vr-giro').value,
-    tasaFic:     document.getElementById('edit-tasa-fic').value,
-    valorGiroFic: currentLead._valorGiroFic || '',
-    utilidadBruta: currentLead._utilidadBruta || ''
+    action:    'update',
+    id:        id,
+    fechaCot:  document.getElementById('edit-fecha-cot').value,
+    fechaNeg:  document.getElementById('edit-fecha-neg').value,
+    ciudadNeg: document.getElementById('edit-ciudad-neg').value,
+    oficinaNeg:document.getElementById('edit-oficina-neg').value,
+    dirNeg:    document.getElementById('edit-dir-neg').value,
+    horaNeg:   document.getElementById('edit-hora-neg').value
+    // AN/AO/AP/AQ son solo página — no se envían al GAS
   };
 
   enviarGAS(params, 'btn-save-analisis', 'save-msg-analisis');
