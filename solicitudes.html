@@ -228,6 +228,7 @@
   </div>
 
 </div>
+
 <script>
 // ── CONFIGURACION ─────────────────────────────────────────────
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwRg05oCtrzyI5bdsaBSlT6BRfb7y2KNpGo3U60xZ65vkDTq19FGMdhFG_GaRovDbIY8g/exec';
@@ -283,23 +284,38 @@ function setSelectVal(id, val) {
   sel.selectedIndex = 0;
 }
 
+// ── FETCH GAS (reemplaza JSONP — funciona en PC y PWA Android) ─
+// GAS exec hace redirect 302 a script.googleusercontent.com
+// fetch() sigue el redirect y recibe CORS headers correctos.
+// Los script tags bloqueaban el redirect en Android WebView (PWA).
+function gasGet(params) {
+  const qs = Object.entries(params)
+    .map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
+    .join('&');
+  return fetch(GAS_URL + '?' + qs, {
+    method: 'GET',
+    redirect: 'follow'
+  }).then(function(r) {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+}
+
 // ── CONSULTAR ─────────────────────────────────────────────────
 function consultar() {
   const id = document.getElementById('id-input').value.trim();
   if (!id || id.length < 6) { showError('Ingresa el ID de 8 digitos.'); return; }
   hideResults(); showLoading('Consultando...');
-  const cbName = 'cb_' + Date.now();
-  const script = document.createElement('script');
-  const timer = setTimeout(() => { cleanup(); showError('Tiempo agotado. Verifica el GAS.'); }, 10000);
-  function cleanup() { clearTimeout(timer); delete window[cbName]; if (script.parentNode) script.parentNode.removeChild(script); }
-  window[cbName] = function(data) {
-    cleanup(); clearEstado();
-    if (data.error) { showError(data.error); return; }
-    renderLead(data);
-  };
-  script.onerror = function() { cleanup(); showError('No se pudo conectar al GAS.'); };
-  script.src = GAS_URL + '?id=' + encodeURIComponent(id) + '&callback=' + cbName;
-  document.head.appendChild(script);
+
+  gasGet({ id: id })
+    .then(function(data) {
+      clearEstado();
+      if (data.error) { showError(data.error); return; }
+      renderLead(data);
+    })
+    .catch(function(err) {
+      showError('No se pudo conectar al GAS. (' + err.message + ')');
+    });
 }
 
 // ── RENDER LEAD ───────────────────────────────────────────────
@@ -425,7 +441,7 @@ function guardarAnalisis() {
   enviarGAS(params, 'btn-save-analisis', 'save-msg-analisis');
 }
 
-// ── HELPER JSONP SEND ─────────────────────────────────────────
+// ── HELPER FETCH SEND (reemplaza JSONP para guardar) ──────────
 function enviarGAS(params, btnId, msgId) {
   const btn = document.getElementById(btnId);
   const msg = document.getElementById(msgId);
@@ -434,31 +450,18 @@ function enviarGAS(params, btnId, msgId) {
   btn.innerHTML = '&#8987; Guardando...';
   msg.style.display = 'none';
 
-  const cbName = 'cbSave_' + Date.now();
-  const script = document.createElement('script');
-  const timer = setTimeout(() => { cleanup(); showSaveMsg(msgId, 'Tiempo agotado', 'err'); }, 10000);
-
-  function cleanup() {
-    clearTimeout(timer);
-    delete window[cbName];
-    if (script.parentNode) script.parentNode.removeChild(script);
-    btn.disabled = false;
-    btn.innerHTML = originalHTML;
-  }
-
-  window[cbName] = function(res) {
-    cleanup();
-    if (res.ok) { showSaveMsg(msgId, 'Cambios guardados', 'ok'); }
-    else { showSaveMsg(msgId, 'Error: ' + (res.error || 'intenta de nuevo'), 'err'); }
-  };
-  script.onerror = function() { cleanup(); showSaveMsg(msgId, 'Error de conexion', 'err'); };
-
-  let qs = '';
-  for (const k in params) {
-    qs += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k] || '');
-  }
-  script.src = GAS_URL + '?' + qs.slice(1) + '&callback=' + cbName;
-  document.head.appendChild(script);
+  gasGet(params)
+    .then(function(res) {
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+      if (res.ok) { showSaveMsg(msgId, 'Cambios guardados', 'ok'); }
+      else { showSaveMsg(msgId, 'Error: ' + (res.error || 'intenta de nuevo'), 'err'); }
+    })
+    .catch(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+      showSaveMsg(msgId, 'Error de conexion: ' + err.message, 'err');
+    });
 }
 
 function showSaveMsg(msgId, txt, type) {
@@ -475,7 +478,7 @@ function hideResults() {
   currentLead = {};
 }
 function showLoading(msg) { const el = document.getElementById('estado'); el.className = 'loading'; el.textContent = msg; el.style.display = 'block'; }
-function showError(msg)   { const el = document.getElementById('estado'); el.className = 'error';   el.textContent = '&#10007;  ' + msg; el.style.display = 'block'; }
+function showError(msg)   { const el = document.getElementById('estado'); el.className = 'error';   el.textContent = '✗  ' + msg; el.style.display = 'block'; }
 function clearEstado()    { const el = document.getElementById('estado'); el.style.display = 'none'; el.className = ''; }
 
 document.getElementById('id-input').addEventListener('keydown', e => { if (e.key === 'Enter') consultar(); });
