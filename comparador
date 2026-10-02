@@ -1,0 +1,1066 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+.cdtgo-comp {
+  --bg:     #0f0d1c;
+  --card:   #1a1730;
+  --border: #2e2a50;
+  --purple: #7c5cfc;
+  --cyan:   #4fc3f7;
+  --green:  #4ade80;
+  --text:   #e2e0f0;
+  --muted:  #a09ec0;
+  --dim:    #6b6988;
+  --gold:   #f59e0b;
+
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 32px 20px 48px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Halftone */
+.cdtgo-comp::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.055) 2px, transparent 2px);
+  background-size: 22px 22px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cdtgo-comp *, .cdtgo-comp *::before, .cdtgo-comp *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.cdtgo-comp .cg-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── HEADER ── */
+.cdtgo-comp .cg-hdr {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.cdtgo-comp .cg-logo {
+  width: 36px; height: 36px;
+  background: var(--purple);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1rem; color: #fff;
+  flex-shrink: 0;
+}
+.cdtgo-comp .cg-brand { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+.cdtgo-comp .cg-brand span { color: var(--purple); }
+.cdtgo-comp .cg-subtitle {
+  font-size: 0.8rem;
+  color: var(--dim);
+  margin-bottom: 28px;
+  padding-left: 48px;
+}
+
+/* ── CONTROLES ── */
+.cdtgo-comp .cg-controles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.cdtgo-comp .cg-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.cdtgo-comp .cg-tab {
+  padding: 7px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .18s;
+  font-family: inherit;
+  line-height: 1.4;
+}
+.cdtgo-comp .cg-tab:hover { border-color: var(--purple); color: var(--text); }
+.cdtgo-comp .cg-tab.active { background: var(--purple); border-color: var(--purple); color: #fff; }
+
+.cdtgo-comp .cg-toggle-wrap {
+  display: flex;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  width: fit-content;
+}
+.cdtgo-comp .cg-tog {
+  padding: 7px 16px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s;
+  font-family: inherit;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.cdtgo-comp .cg-tog.active { background: var(--purple); color: #fff; }
+
+/* ── METODOLOGÍA ── */
+.cdtgo-comp .cg-metodo-box {
+  background: rgba(124,92,252,0.08);
+  border: 1px solid rgba(124,92,252,0.25);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.cdtgo-comp .cg-metodo-box strong { color: var(--purple); }
+.cdtgo-comp .cg-metodo-box .cg-hl { color: var(--cyan); font-weight: 600; }
+.cdtgo-comp .cg-metodo-box.cg-hidden { display: none; }
+
+/* ── SCROLL HINT ── */
+.cdtgo-comp .cg-scroll-hint {
+  display: none;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--dim);
+  padding: 6px 0 2px;
+  letter-spacing: 0.03em;
+}
+
+/* ── TABLA ── */
+.cdtgo-comp .cg-table-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.cdtgo-comp table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.cdtgo-comp thead th {
+  padding: 13px 14px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dim);
+  background: #13112a;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.cdtgo-comp thead th.cg-r { text-align: right; }
+.cdtgo-comp thead th.cg-c { text-align: center; }
+
+.cdtgo-comp tbody tr {
+  border-bottom: 1px solid #1e1c38;
+  transition: background .12s;
+}
+.cdtgo-comp tbody tr:last-child { border-bottom: none; }
+.cdtgo-comp tbody tr:hover { background: rgba(124,92,252,0.06); }
+.cdtgo-comp tbody tr.cg-extra { display: none; }
+.cdtgo-comp tbody tr.cg-extra.visible { display: table-row; }
+
+.cdtgo-comp td {
+  padding: 13px 14px;
+  font-size: 0.88rem;
+  color: var(--text);
+  vertical-align: middle;
+}
+.cdtgo-comp td.cg-r { text-align: right; }
+.cdtgo-comp td.cg-c { text-align: center; }
+
+.cdtgo-comp .cg-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+.cdtgo-comp .cg-r1 { background: rgba(245,158,11,0.18); color: var(--gold); }
+.cdtgo-comp .cg-r2 { background: rgba(226,232,240,0.12); color: #cbd5e1; }
+.cdtgo-comp .cg-r3 { background: rgba(180,100,50,0.15);  color: #cd7c4a; }
+.cdtgo-comp .cg-rn { background: rgba(255,255,255,0.05); color: var(--dim); }
+
+.cdtgo-comp .cg-ent-cell { display: flex; align-items: center; }
+.cdtgo-comp .cg-ent-name { font-weight: 600; color: var(--text); }
+
+.cdtgo-comp .cg-tasa-hi  { font-weight: 700; font-size: 0.98rem; color: var(--green); font-variant-numeric: tabular-nums; }
+.cdtgo-comp .cg-tasa-sec { font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.cdtgo-comp .cg-bar-wrap {
+  width: 100%; max-width: 100px;
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  margin-left: auto;
+  overflow: hidden;
+}
+.cdtgo-comp .cg-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--purple), var(--cyan));
+  transition: width .4s ease;
+}
+
+/* ── BOTÓN ABRIR CDT ── */
+.cdtgo-comp .cg-btn {
+  display: inline-block;
+  padding: 5px 13px;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .18s;
+  white-space: nowrap;
+  border: none;
+  line-height: 1.5;
+}
+.cdtgo-comp .cg-btn-on {
+  background: linear-gradient(135deg, var(--purple), #5b3fd4);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(124,92,252,0.35);
+}
+.cdtgo-comp .cg-btn-on:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,92,252,0.5);
+  color: #fff;
+}
+.cdtgo-comp .cg-btn-off {
+  background: rgba(255,255,255,0.04);
+  color: var(--dim);
+  cursor: default;
+  border: 1px solid var(--border);
+}
+
+/* ── VER TODO ── */
+.cdtgo-comp .cg-ver-wrap {
+  text-align: center;
+  padding: 18px;
+  border-top: 1px solid var(--border);
+}
+.cdtgo-comp .cg-btn-ver {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 24px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .18s;
+  line-height: 1.4;
+}
+.cdtgo-comp .cg-btn-ver:hover {
+  border-color: var(--purple);
+  color: var(--text);
+  background: rgba(124,92,252,0.08);
+}
+.cdtgo-comp .cg-btn-ver .cg-ico { transition: transform .25s; display: inline-block; }
+.cdtgo-comp .cg-btn-ver.expandido .cg-ico { transform: rotate(180deg); }
+
+/* ── LOADING / ERROR ── */
+.cdtgo-comp .cg-estado {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--dim);
+  font-size: 0.9rem;
+}
+.cdtgo-comp .cg-spinner {
+  width: 26px; height: 26px;
+  border: 3px solid var(--border);
+  border-top-color: var(--purple);
+  border-radius: 50%;
+  animation: cgSpin .7s linear infinite;
+  margin: 0 auto 14px;
+}
+@keyframes cgSpin { to { transform: rotate(360deg); } }
+
+/* ── FOOTER ── */
+.cdtgo-comp .cg-footer {
+  margin-top: 20px;
+  font-size: 0.73rem;
+  color: var(--dim);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ── MOBILE ── */
+@media (max-width: 620px) {
+  .cdtgo-comp .cg-controles { flex-direction: column; align-items: flex-start; }
+  .cdtgo-comp .cg-scroll-hint { display: block; }
+  .cdtgo-comp .cg-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--purple) var(--card);
+  }
+  .cdtgo-comp .cg-table-wrap::-webkit-scrollbar { height: 4px; }
+  .cdtgo-comp .cg-table-wrap::-webkit-scrollbar-track { background: var(--card); }
+  .cdtgo-comp .cg-table-wrap::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 2px; }
+  .cdtgo-comp table { min-width: 580px; }
+  .cdtgo-comp td, .cdtgo-comp thead th { padding: 10px 10px; font-size: 0.8rem; white-space: nowrap; }
+  .cdtgo-comp .cg-btn { padding: 5px 10px; font-size: 0.7rem; }
+  .cdtgo-comp .cg-rank { margin-right: 6px; width: 20px; height: 20px; font-size: 0.7rem; }
+}
+
+/* ════════════════════════════════════════════
+   MODAL DE LEADS
+   ════════════════════════════════════════════ */
+.cgm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(8,6,20,0.78);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+.cgm-overlay.cgm-open { display: flex; }
+
+.cgm-modal {
+  background: #13112a;
+  border: 1px solid #2e2a50;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 420px;
+  padding: 32px 28px 28px;
+  position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.65), 0 0 0 1px rgba(124,92,252,0.15);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+/* Línea de acento + halftone */
+.cgm-modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 28px; right: 28px;
+  height: 2px;
+  background: linear-gradient(90deg, #7c5cfc, #4fc3f7);
+  border-radius: 0 0 2px 2px;
+}
+.cgm-modal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.055) 2px, transparent 2px);
+  background-size: 22px 22px;
+  pointer-events: none;
+  z-index: 0;
+}
+.cgm-modal > * { position: relative; z-index: 1; }
+
+/* Logo */
+.cgm-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+.cgm-logo-box {
+  width: 28px; height: 28px;
+  background: #7c5cfc;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.8rem; color: #fff;
+  flex-shrink: 0;
+}
+.cgm-logo-brand { font-size: 0.9rem; font-weight: 700; color: #e2e0f0; }
+.cgm-logo-brand span { color: #7c5cfc; }
+
+/* Destino */
+.cgm-dest {
+  background: rgba(79,195,247,0.07);
+  border: 1px solid rgba(79,195,247,0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.cgm-dest-ico {
+  width: 32px; height: 32px;
+  background: rgba(79,195,247,0.12);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.cgm-dest-label { font-size: 0.7rem; color: #6b6988; font-weight: 500; }
+.cgm-dest-name  { font-size: 0.9rem; font-weight: 700; color: #e2e0f0; }
+.cgm-dest-tasa  { font-size: 0.78rem; color: #4ade80; font-weight: 600; margin-left: auto; white-space: nowrap; }
+
+/* Título y subtítulo */
+.cgm-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  text-wrap: balance;
+  line-height: 1.4;
+}
+.cgm-sub {
+  font-size: 0.8rem;
+  color: #a09ec0;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.cgm-sub strong { color: #4fc3f7; }
+
+/* Formulario */
+.cgm-form { display: flex; flex-direction: column; gap: 11px; margin-bottom: 16px; }
+.cgm-field { display: flex; flex-direction: column; gap: 4px; }
+.cgm-field label {
+  font-size: 0.71rem;
+  font-weight: 600;
+  color: #a09ec0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cgm-field input {
+  background: #1a1730;
+  border: 1px solid #2e2a50;
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-size: 0.87rem;
+  color: #e2e0f0;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s;
+  width: 100%;
+}
+.cgm-field input::placeholder { color: #6b6988; }
+.cgm-field input:focus { border-color: #7c5cfc; }
+.cgm-field input[readonly] { color: #4fc3f7; font-weight: 600; background: #13112a; cursor: default; }
+
+.cgm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+/* Consentimientos */
+.cgm-consents { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.cgm-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 0.72rem;
+  color: #6b6988;
+  line-height: 1.5;
+  cursor: pointer;
+}
+.cgm-consent input[type=checkbox] {
+  width: 15px; height: 15px;
+  accent-color: #7c5cfc;
+  flex-shrink: 0;
+  margin-top: 1px;
+  cursor: pointer;
+}
+.cgm-habeas {
+  font-size: 0.67rem;
+  color: #6b6988;
+  padding-left: 24px;
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+/* Botones */
+.cgm-actions { display: flex; flex-direction: column; gap: 8px; }
+.cgm-btn-primary {
+  width: 100%;
+  padding: 12px;
+  border-radius: 11px;
+  border: none;
+  background: linear-gradient(135deg, #7c5cfc, #5b3fd4);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(124,92,252,0.4);
+  transition: all .18s;
+}
+.cgm-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(124,92,252,0.55); }
+.cgm-btn-primary:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+.cgm-btn-skip {
+  width: 100%;
+  padding: 10px;
+  border-radius: 11px;
+  border: 1px solid #2e2a50;
+  background: transparent;
+  color: #6b6988;
+  font-size: 0.77rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all .18s;
+}
+.cgm-btn-skip:hover { color: #a09ec0; border-color: #3d3860; }
+
+/* Vista confirmación */
+.cgm-confirm { display: none; text-align: center; padding: 8px 0; }
+.cgm-check {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(74,222,128,0.12);
+  border: 2px solid rgba(74,222,128,0.3);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 1.4rem;
+  color: #4ade80;
+}
+.cgm-confirm h3 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.cgm-confirm p  { font-size: 0.82rem; color: #a09ec0; line-height: 1.6; margin-bottom: 20px; }
+.cgm-btn-goto {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 28px;
+  border-radius: 11px;
+  border: none;
+  background: linear-gradient(135deg, #7c5cfc, #5b3fd4);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(124,92,252,0.4);
+  transition: all .18s;
+}
+.cgm-btn-goto:hover { transform: translateY(-1px); }
+
+@media (max-width: 480px) {
+  .cgm-modal { padding: 28px 18px 22px; }
+  .cgm-row { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- ══════════════════════════════════════ -->
+<!--  COMPARADOR                           -->
+<!-- ══════════════════════════════════════ -->
+<div class="cdtgo-comp">
+  <div class="cg-wrap">
+
+    <div class="cg-hdr">
+      <div class="cg-logo">C</div>
+      <div class="cg-brand">CDT<span>go</span></div>
+    </div>
+    <div class="cg-subtitle">Ranking de entidades financieras · datos oficiales SFC</div>
+
+    <div class="cg-controles">
+      <div class="cg-tabs">
+        <button class="cg-tab active" data-plazo="A 90 DIAS">90 días</button>
+        <button class="cg-tab" data-plazo="A 180 DIAS">180 días</button>
+        <button class="cg-tab" data-plazo="A 360 DIAS">360 días</button>
+      </div>
+      <div class="cg-toggle-wrap">
+        <button class="cg-tog active" data-modo="actual">Tasa actual</button>
+        <button class="cg-tog" data-modo="prom30">Promedio 30 días</button>
+      </div>
+    </div>
+
+    <div class="cg-metodo-box" id="cgMetodoActual">
+      <strong>Tasa actual:</strong> último valor reportado por cada entidad a la Superintendencia Financiera de Colombia (SFC). Refleja la tasa vigente más reciente disponible en datos.gov.co.
+    </div>
+    <div class="cg-metodo-box cg-hidden" id="cgMetodoProm30">
+      <strong>Promedio 30 días:</strong> media simple de todas las tasas reportadas por cada entidad durante los últimos 30 días calendario. Permite identificar qué entidades han sido <span class="cg-hl">consistentemente competitivas</span>, más allá de un dato puntual.
+    </div>
+
+    <div class="cg-scroll-hint">← desliza para ver todo →</div>
+
+    <div class="cg-table-wrap">
+      <table>
+        <thead id="cgThead">
+          <tr>
+            <th>#&nbsp;&nbsp;Entidad</th>
+            <th class="cg-r">Tasa actual</th>
+            <th class="cg-r">Prom. 30d</th>
+            <th class="cg-r" style="min-width:90px">Rel. mercado</th>
+            <th class="cg-c" style="min-width:110px">Abrir CDT</th>
+          </tr>
+        </thead>
+        <tbody id="cgTbody">
+          <tr>
+            <td colspan="5">
+              <div class="cg-estado"><div class="cg-spinner"></div>Cargando datos…</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="cg-ver-wrap" id="cgVerWrap" style="display:none">
+        <button class="cg-btn-ver" id="cgBtnVer">
+          <span id="cgVerTxt">Ver ranking completo</span>
+          <span class="cg-ico">▼</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="cg-footer" id="cgFooter">
+      <span>📊 Fuente: datos.gov.co · Superintendencia Financiera de Colombia</span>
+      <span>⚙️ Cálculos propios CDTgo</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!--  MODAL DE LEADS                       -->
+<!-- ══════════════════════════════════════ -->
+<div class="cgm-overlay" id="cgmOverlay" role="dialog" aria-modal="true" aria-labelledby="cgmTitle">
+  <div class="cgm-modal">
+
+    <div class="cgm-logo">
+      <div class="cgm-logo-box">C</div>
+      <div class="cgm-logo-brand">CDT<span>go</span></div>
+    </div>
+
+    <!-- Entidad destino (se llena por JS) -->
+    <div class="cgm-dest">
+      <div class="cgm-dest-ico">🏦</div>
+      <div>
+        <div class="cgm-dest-label">Abriendo CDT en</div>
+        <div class="cgm-dest-name" id="cgmEntidad">—</div>
+      </div>
+      <div class="cgm-dest-tasa" id="cgmTasaPlazo">—</div>
+    </div>
+
+    <!-- Vista formulario -->
+    <div id="cgmFormView">
+      <h2 class="cgm-title" id="cgmTitle">¿Quieres que te avisemos cuando estés cerca del vencimiento?</h2>
+      <p class="cgm-sub">
+        Déjanos tus datos y CDTgo te avisa con anticipación para que decidas si renovar, cambiar de entidad o retirar tu dinero <strong>sin perder ni un día de rendimiento</strong>.
+      </p>
+
+      <div class="cgm-form">
+        <div class="cgm-row">
+          <div class="cgm-field">
+            <label for="cgmNombre">Nombre</label>
+            <input id="cgmNombre" type="text" placeholder="Tu nombre" autocomplete="given-name">
+          </div>
+          <div class="cgm-field">
+            <label for="cgmApellido">Apellido</label>
+            <input id="cgmApellido" type="text" placeholder="Apellido" autocomplete="family-name">
+          </div>
+        </div>
+        <div class="cgm-field">
+          <label for="cgmEmail">Correo electrónico</label>
+          <input id="cgmEmail" type="email" placeholder="correo@ejemplo.com" autocomplete="email">
+        </div>
+        <div class="cgm-field">
+          <label for="cgmCelular">Celular (opcional)</label>
+          <input id="cgmCelular" type="tel" placeholder="300 000 0000" autocomplete="tel">
+        </div>
+        <div class="cgm-row">
+          <div class="cgm-field">
+            <label for="cgmMonto">Monto a invertir</label>
+            <input id="cgmMonto" type="text" placeholder="Ej: $ 5.000.000" inputmode="numeric">
+          </div>
+          <div class="cgm-field">
+            <label for="cgmPlazo">Plazo del CDT</label>
+            <input id="cgmPlazo" type="text" readonly>
+          </div>
+        </div>
+      </div>
+
+      <div class="cgm-consents">
+        <label class="cgm-consent">
+          <input type="checkbox" id="cgmC1" checked>
+          Acepto que CDTgo guarde mis datos para enviarme el recordatorio de vencimiento de mi CDT.
+        </label>
+        <label class="cgm-consent">
+          <input type="checkbox" id="cgmC2" checked>
+          Acepto recibir comunicaciones de CDTgo sobre nuevas tasas, entidades aliadas y oportunidades de inversión. Puedo darme de baja en cualquier momento.
+        </label>
+        <label class="cgm-consent">
+          <input type="checkbox" id="cgmC3" checked>
+          Entiendo que las tasas del comparador son un referente basado en datos de la SFC y no constituyen una oferta vinculante. La tasa definitiva la fija la entidad al momento de apertura del CDT.
+        </label>
+        <p class="cgm-habeas">Tus datos están protegidos bajo la Ley 1581 de 2012 (Habeas Data). No los compartimos con terceros.</p>
+      </div>
+
+      <div class="cgm-actions">
+        <button class="cgm-btn-primary" id="cgmBtnGuardar">Guardar y continuar al banco ↗</button>
+        <button class="cgm-btn-skip" id="cgmBtnSaltar">Continuar sin registrarme</button>
+      </div>
+    </div>
+
+    <!-- Vista confirmación -->
+    <div class="cgm-confirm" id="cgmConfirmView">
+      <div class="cgm-check">✓</div>
+      <h3>¡Listo! Te avisamos al vencimiento</h3>
+      <p id="cgmConfirmMsg">Guardamos tu recordatorio. Ahora te llevamos al portal para completar la apertura de tu CDT.</p>
+      <button class="cgm-btn-goto" id="cgmBtnIr">Ir al banco ↗</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!--  JAVASCRIPT                           -->
+<!-- ══════════════════════════════════════ -->
+<script>
+(function() {
+
+  /* ── Configuración ── */
+  var GAS_TASAS = 'https://script.google.com/macros/s/AKfycbxAhQW4r5tJe-zugLBgiVDszaeC-G9sdqE-6NPW-u_Ts0zIMf4864Swk4V-nRuxmG-3/exec';
+  var GAS_LEADS = 'https://script.google.com/macros/s/AKfycbyvsX0067ZK5PNZ-FHgBVwMItAeXraXEPtcNr-HaCjAxWEyN53ZZYANmfHjdS6tvI5T0w/exec';
+  var FUENTE    = 'https://cdtgo.com/comparador-cdts/';
+
+  /* Popula con los links reales cuando los tengas:
+     'Nombre exacto en ranking': 'https://banco.com/cdt' */
+  var LINKS = {
+    'Banco Popular':        'https://www.bancopopular.com.co/wps/portal/bancopopular/inicio/para-ti/productos-ahorro-inversion/cdt-digital?utm_source=google&utm_medium=CDT-PRS&utm_campaign=Duermetranquilo-performance-searchmarca-CPA-2026&utm_content=CDT&gad_source=1&gad_campaignid=22594075145&gbraid=0AAAAA_GTZllu_Wvz9brnlODcaQz_HkO_a&gclid=CjwKCAjwoOjVBhArEiwAUwDakzTeRiHWQrSAjI0yzyFVjOhUqUbHQ6IC7dXjQRazYfV-BkPGGOiHyRoC1TwQAvD_BwE',
+    'Banco W':              'https://cdtdigital.bancow.com.co/',
+    'Davivienda':           'https://www.davivienda.com/personas/inversiones/cdt#app',
+    'Banco Pichincha':      'https://www.pibank.co/cdt-pibank/',
+    'Banco Finandina':      'https://www.bancofinandina.com/productos/cdts/cdt-virtual',
+    'Mundo Mujer':          'https://www.bmm.com.co/cuentas-de-ahorro/cdt-progrese',
+    'Koa CF':               'https://koa.co/cdt/',
+     'Caja Social':         'https://digital.bancocajasocial.com/cdt',
+     'Av Villas':           'https://www.avvillas.com.co/abrir-cdt-avvillas/',
+     'Banco de Bogotá':      'https://cdtdigital.bancodebogota.com.co/?utm_source=google&utm_medium=search&utm_campaign=cdt-gg-sr-br-ccn-bdb26091b_cdt_col_gg_sr_aonfresh_est_sep_2026&utm_content=estatica&utm_term=bdb26091b_cdt_col_gg_sr_aonfresh_est_sep_2026&gad_source=1&gad_campaignid=21908707660&gbraid=0AAAAABPw3kyjx7FmfrsEiP46pllMgJl2x&gclid=CjwKCAjww-3VBhAcEiwAwUUIu46MD8FcbPVGlrK6BTQyRzZZ3Ptf6VJcTvkRGAUzzcyrBTZtekb6tBoC5zEQAvD_BwE',
+     'Serfinanza':          'https://bancoserfinanza.com/personas/cdt-digital/',
+     'Mibanco':             'https://www.mibanco.com.co/simuladores/cdt',
+     'Tuya':                'https://www.tuya.com.co/cdt',
+     'Credifamilia':        'https://cdt.credifamilia.com/?utm_source=Google&utm_campaign=mejor_cdt&utm_medium=comparacion_cdt&utm_term=comparar%20cdt&gad_source=1&gad_campaignid=24273027254&gbraid=0AAAAADmJlRWnjeZV8tFTYtA3V-o-w6Iex&gclid=Cj0KCQjw5vLVBhCiARIsAD56SFLXs8OjfxHRntP-YeU9jfVCNs29e47FR86c4XETzsWrlrRTRInqL9gaAryREALw_wcB',
+      'Coltefinanciera':      'https://www.coltefinanciera.com.co/cdt/',
+      'Banco Unión':          'https://www.bancounion.com/publicaciones/482/cdt/',
+      'Banco Contactar':      'https://bancocontactar.com/cdt-productivo-online/',
+      'Banco de Occidente':   'https://www.bancodeoccidente.com.co/inversion/cdt',
+      'GNB Sudameris':        'https://www.gnbsudameris.com.co/gnb-premier/ahorro-inversion/premier-inversiones#online',
+      'Bold CF':              'https://bold.co/cf/cdt',
+      'Financiera Juriscoop C.f.': 'https://www.financierajuriscoop.com.co/personas/portafolio/ahorro-e-inversion/cdt',
+      'Iris CF':            'https://iris.com.co/cdt/',
+      'Banco Santander':    'https://www.cdt.santander.com.co/cdt-simulador',
+      'Bancamía':           'https://www.bancamia.com.co/productos/cdt/',
+      'Credifinanciera':    'https://www.ban100.com.co/productos/cdt',
+      'Bancolombia':        'https://www.bancolombia.com/personas/productos/inversiones/simulador-inversion-virtual',
+      'Colpatria':          'https://www.davibank.com/cdt',
+      'Falabella':          'https://www.bancofalabella.com.co/cdt',
+      'Crezcamos':          'https://crezcamos.com/ahorro-e-inversion/cdt-que-es/',
+      'Coopcentral':        'https://www.coopcentral.com.co/index.asp?id_pagina=271.',
+      'Lulo Bank S.a.':     'https://www.lulobank.com/',
+      'BBVA':               'https://www.bbva.com.co/personas/productos/inversion/cdt/online.html',
+      'Nu Bank':            'https://blog.nu.com.co/cdt-nu-haz-que-tu-dinero-crezca/',
+      'Bancoomeva':         'https://www.bancoomeva.com.co/banca_cooperativa/publicaciones/163577/cdt/',
+      'Banco Agrario':      'https://www.bancoagrario.gov.co/personas/asalariado-independiente-pensionado/inversion-cdt',
+      'Coop. JFK':          'https://www.jfk.com.co/cdt-desmaterializado/?_gl=1*16jxntf*_gcl_au*MTE4NzU5NDE4LjE3OTA5MDYwMzM.',
+      'Cooperativa Financiera de Antioquia':      'https://www.cfa.com.co/personas/cdts/cdt-cfa/',
+      'Confiar':            'https://www.confiar.coop/simulador/simulador-cdt/',
+      'Cotrafa':            'https://www.cotrafa.com.co/simuladores/simuladores-de-ahorro/simulador-de-cdt/',
+      'La Hipotecaria':      'https://cdts.lahipotecaria.com/?_gl=1*704p70*_gcl_au*MTYzMDg1NTQ2NC4xNzkwOTA2NDk0*_ga*NjU2MDM2OTQ2LjE3OTA5MDY0OTM.*_ga_51N0XF7VRS*czE3OTA5MDY0OTQkbzEkZzAkdDE3OTA5MDY0OTQkajYwJGwwJGgw', 
+      'Corficolombiana':      'https://www.corfi.com/es/lineas-de-negocio/tesoreria/productos-de-inversion-y-operaciones-del-mercado-monetario/cdt',
+      'Plata. S.a. Compañía de Financiamiento':            'https://plata.co/es/cdt',  
+  };
+
+  var TOP_N     = 10;
+  var DATA      = null;
+  var plazo     = 'A 90 DIAS';
+  var modo      = 'actual';
+  var expandido = false;
+
+  /* ── Estado del modal ── */
+  var cgmCtx = { entidad: '', tasa: '', plazo: '', link: '' };
+
+  /* ════════════════════════════════════════
+     COMPARADOR — carga y render
+  ════════════════════════════════════════ */
+  function cargar() {
+    fetch(GAS_TASAS, { redirect: 'follow' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ DATA = d; renderizar(); })
+      .catch(function(){
+        document.getElementById('cgTbody').innerHTML =
+          '<tr><td colspan="5"><div class="cg-estado">Error al cargar. Intenta recargar la página.</div></td></tr>';
+      });
+  }
+
+  function calcRanking() {
+    if (!DATA || !DATA.series) return [];
+    var rows = [];
+    Object.keys(DATA.series).forEach(function(ent) {
+      var serie = DATA.series[ent][plazo];
+      if (!serie || serie.length === 0) return;
+      var actual = serie[serie.length - 1].tasa;
+      var prom30 = parseFloat((serie.reduce(function(s,p){ return s + p.tasa; }, 0) / serie.length).toFixed(2));
+      rows.push({ entidad: ent, actual: actual, prom30: prom30 });
+    });
+    var sortKey = modo === 'actual' ? 'actual' : 'prom30';
+    rows.sort(function(a, b){ return b[sortKey] - a[sortKey]; });
+    return rows;
+  }
+
+  function plazoLabel(p) {
+    if (p === 'A 90 DIAS')  return '90 días';
+    if (p === 'A 180 DIAS') return '180 días';
+    if (p === 'A 360 DIAS') return '360 días';
+    return p;
+  }
+
+  function renderizar() {
+    var ranking = calcRanking();
+    var total   = ranking.length;
+
+    if (total === 0) {
+      document.getElementById('cgTbody').innerHTML =
+        '<tr><td colspan="5"><div class="cg-estado">Sin datos para este plazo.</div></td></tr>';
+      document.getElementById('cgVerWrap').style.display = 'none';
+      return;
+    }
+
+    var key  = modo === 'actual' ? 'actual' : 'prom30';
+    var maxVal = ranking[0][key];
+    var colA = modo === 'actual' ? 'Tasa actual'   : 'Prom. 30 días';
+    var colB = modo === 'actual' ? 'Prom. 30d'     : 'Tasa actual';
+
+    document.getElementById('cgThead').innerHTML = '<tr>'
+      + '<th>#&nbsp;&nbsp;Entidad</th>'
+      + '<th class="cg-r">' + colA + '</th>'
+      + '<th class="cg-r">' + colB + '</th>'
+      + '<th class="cg-r" style="min-width:90px">Rel. mercado</th>'
+      + '<th class="cg-c" style="min-width:110px">Abrir CDT</th>'
+      + '</tr>';
+
+    var filas = ranking.map(function(row, i) {
+      var rank    = i + 1;
+      var rankCls = rank === 1 ? 'cg-r1' : rank === 2 ? 'cg-r2' : rank === 3 ? 'cg-r3' : 'cg-rn';
+      var pct     = Math.round((row[key] / maxVal) * 100);
+      var esExtra = rank > TOP_N;
+      var v1      = modo === 'actual' ? row.actual : row.prom30;
+      var v2      = modo === 'actual' ? row.prom30 : row.actual;
+      var link    = LINKS[row.entidad] || '';
+      var tasaStr = v1.toFixed(2) + '%';
+      var btnHtml = link
+        ? '<button class="cg-btn cg-btn-on" '
+            + 'data-ent="' + row.entidad.replace(/"/g,'&quot;') + '" '
+            + 'data-tasa="' + tasaStr + '" '
+            + 'data-plazo="' + plazoLabel(plazo) + '" '
+            + 'data-link="' + link.replace(/"/g,'&quot;') + '" '
+            + 'onclick="cgmAbrir(this)">Abrir CDT ↗</button>'
+        : '<button class="cg-btn cg-btn-off" disabled>Próximamente</button>';
+
+      return '<tr class="' + (esExtra ? 'cg-extra' : '') + '">'
+        + '<td><div class="cg-ent-cell">'
+        + '<span class="cg-rank ' + rankCls + '">' + rank + '</span>'
+        + '<span class="cg-ent-name">' + row.entidad + '</span>'
+        + '</div></td>'
+        + '<td class="cg-r"><span class="cg-tasa-hi">' + v1.toFixed(2) + '%</span></td>'
+        + '<td class="cg-r"><span class="cg-tasa-sec">' + v2.toFixed(2) + '%</span></td>'
+        + '<td class="cg-r"><div class="cg-bar-wrap"><div class="cg-bar-fill" style="width:' + pct + '%"></div></div></td>'
+        + '<td class="cg-c">' + btnHtml + '</td>'
+        + '</tr>';
+    }).join('');
+
+    document.getElementById('cgTbody').innerHTML = filas;
+
+    if (expandido) {
+      document.querySelectorAll('.cg-extra').forEach(function(tr){ tr.classList.add('visible'); });
+    }
+
+    var verWrap = document.getElementById('cgVerWrap');
+    if (total > TOP_N) {
+      verWrap.style.display = 'block';
+      actualizarBtnVer(total);
+    } else {
+      verWrap.style.display = 'none';
+    }
+
+    if (DATA.corte) {
+      document.getElementById('cgFooter').innerHTML =
+        '<span>📊 Fuente: datos.gov.co · Superintendencia Financiera de Colombia</span>'
+        + '<span>⚙️ Cálculos propios CDTgo · Corte: ' + DATA.corte + '</span>';
+    }
+  }
+
+  function actualizarBtnVer(total) {
+    var txt  = document.getElementById('cgVerTxt');
+    var btn  = document.getElementById('cgBtnVer');
+    var rest = total - TOP_N;
+    if (expandido) {
+      txt.textContent = 'Ver solo Top 10';
+      btn.classList.add('expandido');
+    } else {
+      txt.textContent = 'Ver ranking completo (' + rest + ' entidades más)';
+      btn.classList.remove('expandido');
+    }
+  }
+
+  document.getElementById('cgBtnVer').addEventListener('click', function() {
+    expandido = !expandido;
+    document.querySelectorAll('.cg-extra').forEach(function(tr){
+      tr.classList.toggle('visible', expandido);
+    });
+    actualizarBtnVer(calcRanking().length);
+  });
+
+  document.querySelectorAll('.cg-tab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.cg-tab').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      plazo = btn.dataset.plazo;
+      expandido = false;
+      renderizar();
+    });
+  });
+
+  document.querySelectorAll('.cg-tog').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.cg-tog').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      modo = btn.dataset.modo;
+      expandido = false;
+      document.getElementById('cgMetodoActual').classList.toggle('cg-hidden', modo !== 'actual');
+      document.getElementById('cgMetodoProm30').classList.toggle('cg-hidden', modo !== 'prom30');
+      renderizar();
+    });
+  });
+
+  /* ════════════════════════════════════════
+     MODAL — apertura
+  ════════════════════════════════════════ */
+  window.cgmAbrir = function(btn) {
+    cgmCtx.entidad = btn.dataset.ent;
+    cgmCtx.tasa    = btn.dataset.tasa;
+    cgmCtx.plazo   = btn.dataset.plazo;
+    cgmCtx.link    = btn.dataset.link;
+
+    /* Llenar datos en el modal */
+    document.getElementById('cgmEntidad').textContent  = cgmCtx.entidad;
+    document.getElementById('cgmTasaPlazo').textContent = cgmCtx.tasa + ' EA · ' + cgmCtx.plazo;
+    document.getElementById('cgmPlazo').value           = cgmCtx.plazo;
+
+    /* Resetear a vista de formulario */
+    document.getElementById('cgmFormView').style.display    = 'block';
+    document.getElementById('cgmConfirmView').style.display = 'none';
+    document.getElementById('cgmBtnGuardar').disabled       = false;
+    document.getElementById('cgmBtnGuardar').textContent    = 'Guardar y continuar al banco ↗';
+
+    /* Abrir overlay */
+    document.getElementById('cgmOverlay').classList.add('cgm-open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  /* Cerrar al hacer clic fuera del modal */
+  document.getElementById('cgmOverlay').addEventListener('click', function(e) {
+    if (e.target === this) cgmCerrar();
+  });
+
+  function cgmCerrar() {
+    document.getElementById('cgmOverlay').classList.remove('cgm-open');
+    document.body.style.overflow = '';
+  }
+
+  /* ════════════════════════════════════════
+     MODAL — envío de lead
+  ════════════════════════════════════════ */
+  document.getElementById('cgmBtnGuardar').addEventListener('click', function() {
+    var nombre   = document.getElementById('cgmNombre').value.trim();
+    var apellido = document.getElementById('cgmApellido').value.trim();
+    var email    = document.getElementById('cgmEmail').value.trim();
+
+    if (!nombre || !apellido || !email) {
+      alert('Por favor completa Nombre, Apellido y Correo electrónico.');
+      return;
+    }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+
+    var payload = {
+      entidad:              cgmCtx.entidad,
+      plazo:                cgmCtx.plazo,
+      tasa:                 cgmCtx.tasa,
+      nombre:               nombre,
+      apellido:             apellido,
+      email:                email,
+      celular:              document.getElementById('cgmCelular').value.trim(),
+      monto:                document.getElementById('cgmMonto').value.trim(),
+      consent_recordatorio: document.getElementById('cgmC1').checked,
+      consent_marketing:    document.getElementById('cgmC2').checked,
+      consent_disclaimer:   document.getElementById('cgmC3').checked,
+      tipo:                 'lead',
+      fuente:               FUENTE
+    };
+
+    fetch(GAS_LEADS, {
+      method:      'POST',
+      mode:        'no-cors',
+      headers:     { 'Content-Type': 'text/plain' },
+      body:        JSON.stringify(payload)
+    })
+    .catch(function(){})
+    .finally(function() {
+      /* Mostrar confirmación y habilitar botón ir al banco */
+      document.getElementById('cgmFormView').style.display    = 'none';
+      document.getElementById('cgmConfirmView').style.display = 'block';
+      document.getElementById('cgmConfirmMsg').innerHTML =
+        'Guardamos tu recordatorio. Ahora te llevamos al portal de <strong>' + cgmCtx.entidad + '</strong>.';
+      document.getElementById('cgmBtnIr').textContent = 'Ir a ' + cgmCtx.entidad + ' ↗';
+    });
+  });
+
+  /* ════════════════════════════════════════
+     MODAL — saltar sin registrarse
+  ════════════════════════════════════════ */
+  document.getElementById('cgmBtnSaltar').addEventListener('click', function() {
+    /* Registrar clic anónimo en el GAS (fire & forget) */
+    fetch(GAS_LEADS, {
+      method:  'POST',
+      mode:    'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    JSON.stringify({
+        entidad: cgmCtx.entidad,
+        plazo:   cgmCtx.plazo,
+        tasa:    cgmCtx.tasa,
+        tipo:    'click_anonimo',
+        fuente:  FUENTE
+      })
+    }).catch(function(){});
+
+    cgmCerrar();
+    window.open(cgmCtx.link, '_blank', 'noopener');
+  });
+
+  /* Botón "Ir al banco" en confirmación */
+  document.getElementById('cgmBtnIr').addEventListener('click', function() {
+    cgmCerrar();
+    window.open(cgmCtx.link, '_blank', 'noopener');
+  });
+
+  /* ════════════════════════════════════════
+     INICIO
+  ════════════════════════════════════════ */
+  cargar();
+
+})();
+</script>
