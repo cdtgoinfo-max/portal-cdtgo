@@ -274,26 +274,39 @@
 
 <script>
 // ── AUTH ──────────────────────────────────────────────────────
-// Escribe aquí tus 3 datos de seguridad en texto plano (sin atob/btoa)
-const A1 = '$518790$';
+// La clave (paso 1) ya NO está aquí: la valida el Apps Script.
 const A2 = ['mcastrillon@cdtgo.com'];
-const A3 = 'suma valores';
+const A3 = 'tu respuesta en minúsculas';
+let AUTH_TOKEN = '';
 
 function authShow(n) {
   document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
   document.getElementById('a-step-' + n).classList.add('active');
   setTimeout(() => document.getElementById('a-in-' + n).focus(), 50);
 }
+function authFail(n, msg) {
+  document.getElementById('a-err-' + n).textContent = msg || '✕ Incorrecto.';
+  document.getElementById('a-in-' + n).value = '';
+}
 function authCheck(n) {
   const raw = document.getElementById('a-in-' + n).value;
-  const v = n === 1 ? raw : raw.trim().toLowerCase();
-  const ok = n === 1 ? v === A1 : n === 2 ? A2.includes(v) : v === A3;
-  if (!ok) {
-    document.getElementById('a-err-' + n).textContent = '✕ Incorrecto.';
-    document.getElementById('a-in-' + n).value = '';
+
+  if (n === 1) {
+    AUTH_TOKEN = raw;
+    document.getElementById('a-err-1').textContent = 'Verificando…';
+    gasGet({ action: 'ping' })
+      .then(res => {
+        if (res.ok) { document.getElementById('a-err-1').textContent = ''; authShow(2); }
+        else { AUTH_TOKEN = ''; authFail(1); }
+      })
+      .catch(() => { AUTH_TOKEN = ''; authFail(1, '✕ Error de conexión.'); });
     return;
   }
-  if (n < 3) { authShow(n + 1); return; }
+
+  const v = raw.trim().toLowerCase();
+  const ok = n === 2 ? A2.includes(v) : v === A3;
+  if (!ok) { authFail(n); return; }
+  if (n === 2) { authShow(3); return; }
   document.getElementById('auth-overlay').style.display = 'none';
   document.getElementById('main-app').style.display = 'block';
 }
@@ -362,7 +375,7 @@ function setSelectVal(id, val) {
 // fetch() sigue el redirect y recibe CORS headers correctos.
 // Los script tags bloqueaban el redirect en Android WebView (PWA).
 function gasGet(params) {
-  const qs = Object.entries(params)
+  const qs = Object.entries(Object.assign({}, params, { token: AUTH_TOKEN }))
     .map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
     .join('&');
   return fetch(GAS_URL + '?' + qs, {
