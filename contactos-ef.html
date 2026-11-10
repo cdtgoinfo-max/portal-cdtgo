@@ -305,9 +305,10 @@ footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:18
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyFjsHhQarW9WHDSaba2rg_lTxKfBmNYnqT2FbTTOFAiSnu7tG2cletXwkinWOxMlYmow/exec';
 
 // ── AUTH ─────────────────────────────────────────────────────
-const S1 = '$518790$';
+// La clave (paso 1) ya NO está aquí: la valida el Apps Script.
 const S2 = ['mcastrillon@cdtgo.com'];
-const S3 = 'suma valores';
+const S3 = 'tu respuesta en minúsculas';
+let AUTH_TOKEN = '';
 
 let authStep = 1;
 
@@ -329,9 +330,16 @@ function setStep(n) {
 }
 
 function checkStep1() {
-  const v = document.getElementById('s1input').value;
-  if(v === S1) { document.getElementById('s1err').textContent=''; setStep(2); }
-  else { document.getElementById('s1err').textContent='Código incorrecto.'; }
+  AUTH_TOKEN = document.getElementById('s1input').value;
+  const err = document.getElementById('s1err');
+  err.textContent = 'Verificando…';
+  fetch(GAS_URL + '?action=ping&token=' + encodeURIComponent(AUTH_TOKEN), { redirect: 'follow' })
+    .then(r => r.json())
+    .then(res => {
+      if (res.ok) { err.textContent = ''; setStep(2); }
+      else { AUTH_TOKEN = ''; err.textContent = 'Código incorrecto.'; document.getElementById('s1input').value = ''; }
+    })
+    .catch(() => { AUTH_TOKEN = ''; err.textContent = 'Error de conexión.'; });
 }
 function checkStep2() {
   const v = document.getElementById('s2input').value.trim().toLowerCase();
@@ -375,9 +383,10 @@ function iniciarApp() {
 }
 
 function cargarEntidades() {
-  fetch(GAS_URL + '?action=getEntidades')
+  fetch(GAS_URL + '?action=getEntidades&token=' + encodeURIComponent(AUTH_TOKEN))
     .then(r => r.json())
     .then(data => {
+      if (!Array.isArray(data)) throw new Error('respuesta inválida');
       // Dropdown formulario
       const sel = document.getElementById('fEntidad');
       sel.innerHTML = '<option value="">Selecciona entidad…</option>';
@@ -426,7 +435,7 @@ function guardarContacto() {
 
   fetch(GAS_URL, {
     method: 'POST',
-    body: JSON.stringify({action:'guardar', datos: campos})
+    body: JSON.stringify({action:'guardar', token: AUTH_TOKEN, datos: campos})
   })
   .then(r => r.json())
   .then(res => {
@@ -473,9 +482,10 @@ function consultarContactos() {
   btn.disabled = true;
   btn.innerHTML = '⏳ Buscando…';
 
-  fetch(GAS_URL + '?action=consultarContactos&entidad=' + encodeURIComponent(entidad))
+  fetch(GAS_URL + '?action=consultarContactos&entidad=' + encodeURIComponent(entidad) + '&token=' + encodeURIComponent(AUTH_TOKEN))
     .then(r => r.json())
     .then(data => {
+      if (!Array.isArray(data)) { showToast('Error: ' + (data.error || 'respuesta inválida'), 'err'); return; }
       mostrarResultados(entidad, data);
     })
     .catch(() => showToast('Error de conexión al consultar', 'err'))
