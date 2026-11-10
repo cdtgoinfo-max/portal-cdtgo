@@ -72,10 +72,53 @@
 
   @media(max-width:500px){.search-box{flex-direction:column;align-items:stretch}.search-label{display:none}#btn-consultar{width:100%;text-align:center}.section-body{grid-template-columns:1fr 1fr}}
   @media(max-width:360px){.section-body{grid-template-columns:1fr}}
+
+  /* AUTH OVERLAY */
+  #auth-overlay{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}
+  .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:420px;padding:28px;text-align:center}
+  .auth-card h2{font-size:18px;margin-bottom:4px}
+  .auth-card p{font-size:12px;color:var(--muted);font-family:var(--mono);margin-bottom:20px}
+  .auth-step{display:none}
+  .auth-step.active{display:block}
+  .auth-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--label);margin-bottom:10px}
+  .auth-card input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:15px;padding:12px 16px;outline:none;text-align:center}
+  .auth-card input:focus{border-color:var(--accent)}
+  .auth-btn{width:100%;margin-top:12px;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer}
+  .auth-error{margin-top:8px;font-size:12px;color:#f47171;min-height:18px;font-family:var(--mono)}
 </style>
 </head>
 <body>
-<div class="app">
+
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <h2>Portal CDTgo</h2>
+    <p>Acceso restringido · Solo equipo</p>
+
+    <div class="auth-step active" id="a-step-1">
+      <div class="auth-label">Paso 1 de 3 · Código de acceso</div>
+      <input type="password" id="a-in-1" autocomplete="off">
+      <button class="auth-btn" onclick="authCheck(1)">Continuar →</button>
+      <div class="auth-error" id="a-err-1"></div>
+    </div>
+
+    <div class="auth-step" id="a-step-2">
+      <div class="auth-label">Paso 2 de 3 · Email autorizado</div>
+      <input type="email" id="a-in-2" placeholder="usuario@cdtgo.com" autocomplete="off">
+      <button class="auth-btn" onclick="authCheck(2)">Continuar →</button>
+      <div class="auth-error" id="a-err-2"></div>
+    </div>
+
+    <div class="auth-step" id="a-step-3">
+      <div class="auth-label">Paso 3 de 3 · Verificación</div>
+      <input type="text" id="a-in-3" placeholder="Respuesta" autocomplete="off">
+      <button class="auth-btn" onclick="authCheck(3)">Ingresar →</button>
+      <div class="auth-error" id="a-err-3"></div>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="main-app" style="display:none">
   <div class="header">
     <div class="logo-badge">C</div>
     <div><h1>Portal Interno CDTgo</h1><span>Consulta de leads · Uso exclusivo del equipo</span></div>
@@ -230,6 +273,36 @@
 </div>
 
 <script>
+// ── AUTH ──────────────────────────────────────────────────────
+// Escribe aquí tus 3 datos de seguridad en texto plano (sin atob/btoa)
+const A1 = '$518790$';
+const A2 = ['mcastrillon@cdtgo.com'];
+const A3 = 'suma valores';
+
+function authShow(n) {
+  document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('a-step-' + n).classList.add('active');
+  setTimeout(() => document.getElementById('a-in-' + n).focus(), 50);
+}
+function authCheck(n) {
+  const raw = document.getElementById('a-in-' + n).value;
+  const v = n === 1 ? raw : raw.trim().toLowerCase();
+  const ok = n === 1 ? v === A1 : n === 2 ? A2.includes(v) : v === A3;
+  if (!ok) {
+    document.getElementById('a-err-' + n).textContent = '✕ Incorrecto.';
+    document.getElementById('a-in-' + n).value = '';
+    return;
+  }
+  if (n < 3) { authShow(n + 1); return; }
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+}
+[1, 2, 3].forEach(n => {
+  document.getElementById('a-in-' + n).addEventListener('keydown', e => {
+    if (e.key === 'Enter') authCheck(n);
+  });
+});
+
 // ── CONFIGURACION ─────────────────────────────────────────────
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwRg05oCtrzyI5bdsaBSlT6BRfb7y2KNpGo3U60xZ65vkDTq19FGMdhFG_GaRovDbIY8g/exec';
 
